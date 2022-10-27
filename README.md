@@ -1,2 +1,2 @@
-# Projekat-Arhitektura-i-projektovanje-softwera
-Projekat iz predmeta Arhitektura i projektovanje softwera
+# Projekat-Arhitektura-i-projektovanje-softvera
+Projekat iz predmeta Arhitektura i projektovanje softvera
