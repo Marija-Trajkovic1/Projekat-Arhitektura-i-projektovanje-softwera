@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TaskITBackend.Models;
@@ -44,5 +45,9 @@ namespace TaskItBackend.Models
         public int NadoknadaZaUradjenPosao { get; set; }
 
         public TipPosla TipPoslaOglasZaPosao { get; set; }
+
+        public Poslodavac MojPoslodavac { get; set; }
+
+        public Radnik RadiRadnik { get; set; }
     }
 }

@@ -38,11 +38,12 @@ namespace TaskItBackend.Models
         [MaxLength(20)]
         public string PotvrdaLozinke { get; set; }
    
-        [Required]
-        public string Salt{get;set;}
+        //[Required]
+        //public string Salt{get;set;}
 
-        [Required]
-        public string Slika { get; set; }
+        //Kad sredim sve onda
+        //[Required]
+        //public string Slika { get; set; }
 
         [Required]
         [MaxLength(20)]
@@ -55,11 +56,11 @@ namespace TaskItBackend.Models
         [Required]
         public int BrojStana { get; set; }
         
-        [NotMapped]
-        public IFormFile FajlSlike { get;set;}
+        //[NotMapped]
+        //public IFormFile FajlSlike { get;set;}
 
-        [NotMapped]
-        public string PorekloSlike { get;set;}
+        //[NotMapped]
+       // public string PorekloSlike { get;set;}
 
         
 
