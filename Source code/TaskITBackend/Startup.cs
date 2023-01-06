@@ -58,6 +58,8 @@ namespace TaskITBackend
             {
                 endpoints.MapControllers();
             });
+
+            //app.UseMvc();
         }
     }
 }
