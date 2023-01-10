@@ -12,8 +12,11 @@ namespace TaskIT.Model
         [DefaultValue(0)]
         public int BrojOdradjenihPoslova { get; set; }
 
+        [DefaultValue(0)]
+        public int UkupanZbirOcena { get; set; }    
+
         public List<Poslodavac> ListaPoslodavaca { get; set; }
         public List<TipPosla> ListaTipova { get; set; }
-        public List<OglasZaPosao> ListaPoslovaKojeRadi { get; set; }
+        public List<RadnikRadiPosao> ListaPoslovaKojeRadi { get; set; }
     }
 }

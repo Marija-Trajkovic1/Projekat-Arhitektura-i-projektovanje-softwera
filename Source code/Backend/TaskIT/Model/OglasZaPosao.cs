@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace TaskIT.Model
 {
@@ -45,6 +46,7 @@ namespace TaskIT.Model
 
         public Poslodavac MojPoslodavac { get; set; }
 
-        public Radnik RadiRadnik { get; set; }
+        //[JsonIgnore]
+        public RadnikRadiPosao RadiRadnik { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace TaskIT.Model
 {
     public class TaskITContext : DbContext
     {
-        public TaskITContext(DbContextOptions op) : base(op)
+        public TaskITContext(DbContextOptions<TaskITContext> op) : base(op)
         {
         }
         public DbSet<Korisnik> Korisnici { get; set; }
