@@ -1,42 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskIT.Model;
-using TaskIT.Services.KorisnikService;
+using TaskIT.Repository.UnityOfWork;
 
 namespace TaskIT.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
-    public class KorisnikController
+    public class KorisnikController : Controller
     {
-        private readonly ILogger<KorisnikController> _logger;
-        private readonly IKorisnikService _iKorisnikService;
+        private readonly TaskITContext context;
+        public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public KorisnikController(ILogger<KorisnikController> logger, IKorisnikService  iKorisnikService)
+        public UnitOfWork _unitOfWork { get; set; }
+        
+        public KorisnikController(TaskITContext context) 
         {
-            _logger = logger;
-            _iKorisnikService= iKorisnikService;
+            this.context = context;
+            _unitOfWork = new UnitOfWorkImpl(this.context);
         }
 
-        [Route("ObrisiKorisnikaPrekoID")]
-        [HttpDelete]
-        public Task<ActionResult> ObrisiKorisnikaPrekoIDja(int idKorisnika)
-        {
-            return _iKorisnikService.ObrisiKorisnikaPrekoIDja(idKorisnika);
-        }
-
-        [Route("ObrisiRadnikaPrekoID\\{idRadnika}")]
-        [HttpDelete]
-        public Task<ActionResult> ObrisiRadnika(int idRadnika)
-        {
-            return _iKorisnikService.ObrisiRadnika(idRadnika);
-        }
-
-        [Route("OceniRadnika\\{idRadnika}\\{ocena}")]
-        public Task<ActionResult> OceniRadnika(int idRadnika, int ocena)
-        {
-            return _iKorisnikService.OceniRadnika(idRadnika, ocena);
-        }
-
-
+        
     }
 }
