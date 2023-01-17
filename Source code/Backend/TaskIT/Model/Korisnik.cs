@@ -11,31 +11,31 @@ namespace TaskIT.Model
 
         [Required]
         [MaxLength(20)]
-        public string Ime { get; set; }
+        public string Ime { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string Prezime { get; set; }
+        public string Prezime { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(50)]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string BrojTelefona { get; set; }
+        public string BrojTelefona { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string Lozinka { get; set; }
+        public string Lozinka { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string KorisnickoIme { get; set; }
+        public string KorisnickoIme { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string PotvrdaLozinke { get; set; }
+        public string PotvrdaLozinke { get; set; } = string.Empty;
 
         //[Required]
         //public string Salt{get;set;}
@@ -46,11 +46,11 @@ namespace TaskIT.Model
 
         [Required]
         [MaxLength(20)]
-        public string Grad { get; set; }
+        public string Grad { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string Ulica { get; set; }
+        public string Ulica { get; set; } = string.Empty;
 
         [Required]
         public int BrojStana { get; set; }

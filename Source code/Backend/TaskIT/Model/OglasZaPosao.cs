@@ -12,19 +12,19 @@ namespace TaskIT.Model
 
         [Required]
         [MaxLength(20)]
-        public string Naziv { get; set; }
+        public string Naziv { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(100)]
-        public string KratakOpis { get; set; }
+        public string KratakOpis { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string Grad { get; set; }
+        public string Grad { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string Ulica { get; set; }
+        public string Ulica { get; set; } = string.Empty;
 
         [Required]
         public int BrojStana { get; set; }
@@ -42,11 +42,13 @@ namespace TaskIT.Model
         [Range(0, 10000)]
         public int NadoknadaZaUradjenPosao { get; set; }
 
-        public TipPosla TipPoslaOglasZaPosao { get; set; }
+        public TipPosla? TipPoslaOglasZaPosao { get; set; }
 
-        public Poslodavac MojPoslodavac { get; set; }
+       
+        public Poslodavac MojPoslodavac { get; set; } = null!;
 
         //[JsonIgnore]
-        public RadnikRadiPosao RadiRadnik { get; set; }
+
+        public RadnikRadiPosao? RadiRadnik { get; set; }
     }
 }

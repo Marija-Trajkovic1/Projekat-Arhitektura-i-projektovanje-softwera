@@ -6,6 +6,7 @@ namespace TaskIT.Repository.TipPoslaRepositoryF
     {
         public TipPoslaRepositoryImpl(TaskITContext context):base(context)
         { 
+
         }
 
         public TaskITContext TaskITContext
@@ -17,5 +18,6 @@ namespace TaskIT.Repository.TipPoslaRepositoryF
         {
             throw new NotImplementedException();
         }
+
     }
 }

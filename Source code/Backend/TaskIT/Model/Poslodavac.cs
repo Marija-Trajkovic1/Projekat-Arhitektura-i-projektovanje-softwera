@@ -5,6 +5,6 @@ namespace TaskIT.Model
     [Table("Poslodavac")]
     public class Poslodavac : Korisnik
     {
-        public List<OglasZaPosao> OglasiPoslodavca { get; set; }
+        public List<OglasZaPosao>? OglasiPoslodavca { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 global using Microsoft.EntityFrameworkCore;
 global using TaskIT.Model;
+using TaskIT.Repository;
 
 
 
@@ -14,6 +15,9 @@ builder.Services.AddDbContext<TaskITContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("TaskItCS"));
 });
+
+builder.Services.AddTransient(typeof(Repository<>), typeof(RepositoryImpl<>));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

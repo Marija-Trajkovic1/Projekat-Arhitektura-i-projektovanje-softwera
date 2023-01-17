@@ -18,10 +18,7 @@ namespace TaskIT.Repository.KorisnikRepositoryF
             get { return TaskITContext as TaskITContext; }
        }
 
-        public IEnumerable<Korisnik> UpisiNovogKorisnika(Korisnik korisnik)
-        {
-            throw new NotImplementedException();
-        }
+       
 
        
             
