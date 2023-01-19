@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace TaskIT.Model
 {
@@ -13,10 +14,15 @@ namespace TaskIT.Model
         public int BrojOdradjenihPoslova { get; set; }
 
         [DefaultValue(0)]
-        public int UkupanZbirOcena { get; set; }    
+        public int UkupanZbirOcena { get; set; }
 
+        [JsonIgnore]
         public List<Poslodavac>? ListaPoslodavaca { get; set; }
+
+        [JsonIgnore]
         public List<TipPosla>? ListaTipova { get; set; }
+
+        [JsonIgnore]
         public List<RadnikRadiPosao>? ListaPoslovaKojeRadi { get; set; }
     }
 }

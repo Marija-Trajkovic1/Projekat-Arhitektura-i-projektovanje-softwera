@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TaskIT.Model;
 using TaskIT.Repository.UnityOfWork;
 
 namespace TaskIT.Controllers
@@ -24,7 +25,7 @@ namespace TaskIT.Controllers
         {
             try
             {
-                this._unitOfWork.TipoviPoslova.Add(novitip);//?
+                this._unitOfWork.TipoviPoslova.Add(novitip);
                 return Ok(novitip);
             }
             catch (Exception exception)
@@ -52,10 +53,18 @@ namespace TaskIT.Controllers
             }
         }
 
+        [Route("VratiTipove")]
+        [HttpGet]
+        public async Task<IActionResult> VratiTipove()
+        {
+            return new JsonResult(this._unitOfWork.TipoviPoslova.GetAll()); 
+
+        }
 
 
 
-                      
+
+
 
     }
 }

@@ -1,6 +1,7 @@
 global using Microsoft.EntityFrameworkCore;
 global using TaskIT.Model;
 using TaskIT.Repository;
+using TaskIT.Hubs;
 
 
 
@@ -22,7 +23,7 @@ builder.Services.AddTransient(typeof(Repository<>), typeof(RepositoryImpl<>));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -36,6 +37,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.MapHub<NoviOglasHub>("/noviOglasHub");
 
 app.MapControllers();
 

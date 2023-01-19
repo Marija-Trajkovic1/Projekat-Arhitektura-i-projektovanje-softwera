@@ -21,8 +21,6 @@ namespace TaskIT.Repository.UnityOfWork
             RadniciRadePoslove = new RadnikRadiPosaoRepositoryImpl(context);
             Radnici = new RadnikRepositoryImpl(context);
             TipoviPoslova = new TipPoslaRepositoryImpl(context);
-
-
         }
 
         public KorisnikRepository Korisnici { get; private set; }

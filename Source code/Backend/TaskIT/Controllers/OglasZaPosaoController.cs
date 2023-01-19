@@ -23,6 +23,7 @@ namespace TaskIT.Controllers
             try
             {
                 this.unitOfWork.OglasiZaPoslove.Add(oglas);//?
+                this.unitOfWork.Complete(); 
                 return Ok(oglas);
             }
             catch (Exception exception)

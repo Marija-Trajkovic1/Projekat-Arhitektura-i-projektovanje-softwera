@@ -23,13 +23,22 @@ namespace TaskIT.Controllers
         {
             try
             {
-                this._unitOfWork.Radnici.Add(noviRadnik); 
+                this._unitOfWork.Radnici.Add(noviRadnik);
+                this._unitOfWork.Complete();
                 return Ok(noviRadnik);
             }
             catch (Exception exception)
             {
                 return BadRequest(exception);
             }
+        }
+
+        [Route("VratiRadnike")]
+        [HttpGet]
+        public async Task<IActionResult> VratiRadnike()
+        {
+            return new JsonResult(this._unitOfWork.Radnici.GetAll());
+
         }
     }
 }
