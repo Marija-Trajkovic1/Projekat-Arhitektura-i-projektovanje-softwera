@@ -41,3 +41,5 @@ build/
 bld/
 dlldata.c
 wwwroot/
+.vscode/
+.vs/
