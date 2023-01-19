@@ -43,3 +43,4 @@ dlldata.c
 wwwroot/
 .vscode/
 .vs/
+node_modules/
