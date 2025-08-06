@@ -5,26 +5,26 @@ namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class OglasZaPosaoController : ControllerBase
+    public class JobAdvertisementController : ControllerBase
     {
         private readonly TaskITContext context;
         public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public OglasZaPosaoController(TaskITContext context)
+        public JobAdvertisementController(TaskITContext context)
         {
             this.context = context;
 
         }
 
-        [Route("DodajNoviOglas")]
+        [Route("AddNewJobAdvertisement")]
         [HttpPost]
-        public async Task<IActionResult> DodajNoviOglas([FromBody] OglasZaPosao oglas)
+        public async Task<IActionResult> AddNewJobAdvertisement([FromBody] JobAdvertisement advertisement)
         {
             try
             {
-                this.unitOfWork.OglasiZaPoslove.Add(oglas);//?
+                this.unitOfWork.JobAdvertisements.Add(advertisement);//?
                 this.unitOfWork.Complete(); 
-                return Ok(oglas);
+                return Ok(advertisement);
             }
             catch (Exception exception)
             {

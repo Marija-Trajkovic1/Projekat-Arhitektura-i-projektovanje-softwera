@@ -8,10 +8,48 @@ namespace TaskIT.Model
         public TaskITContext(DbContextOptions<TaskITContext> op) : base(op)
         {
         }
-        public DbSet<Korisnik> Korisnici { get; set; }
-        public DbSet<Radnik> Radnici { get; set; }
-        public DbSet<Poslodavac> Poslodavci { get; set; }
-        public DbSet<OglasZaPosao> OglasiZaPosao { get; set; }
-        public DbSet<TipPosla> TipoviPoslova { get; set; }
+        public DbSet<User> Korisnici { get; set; }
+        public DbSet<JobAdvertisement> OglasiZaPosao { get; set; }
+        public DbSet<FinishedJob> OdradjeniPoslovi { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            // Jedan korisnik može postaviti više oglasa
+            modelBuilder.Entity<JobAdvertisement>()
+                .HasOne(o => o.MyEmployer)
+                .WithMany(k => k.UserPostedAdv)
+                .HasForeignKey(o => o.MyEmployerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Jedan korisnik može se prijaviti na više oglasa
+            modelBuilder.Entity<JobAdvertisement>()
+                .HasOne(o => o.MyWorker)
+                .WithMany(k => k.UserAppliedAdv)
+                .HasForeignKey(o => o.MyWorkerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Veza OdradjeniPosao -> Radnik
+            modelBuilder.Entity<FinishedJob>()
+                .HasOne(p => p.Worker)
+                .WithMany()
+                .HasForeignKey(p => p.WorkerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Veza OdradjeniPosao -> Poslodavac
+            modelBuilder.Entity<FinishedJob>()
+                .HasOne(p => p.Employer)
+                .WithMany()
+                .HasForeignKey(p => p.EmployerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Veza OdradjeniPosao -> Oglas
+            modelBuilder.Entity<FinishedJob>()
+                .HasOne(p => p.JobAdvertisement)
+                .WithMany()
+                .HasForeignKey(p => p.JobAdvertisementId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

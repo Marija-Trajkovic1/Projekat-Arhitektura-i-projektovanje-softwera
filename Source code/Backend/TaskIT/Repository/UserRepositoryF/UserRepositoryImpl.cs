@@ -4,12 +4,12 @@ using System.Linq.Expressions;
 using System.Linq;
 using TaskIT.Model;
 
-namespace TaskIT.Repository.KorisnikRepositoryF
+namespace TaskIT.Repository.UserRepositoryF
 {
-    public class KorisnikRepositoryImpl : RepositoryImpl<Korisnik>, KorisnikRepository
+    public class UserRepositoryImpl : RepositoryImpl<User>, UserRepository
     {
        
-       public KorisnikRepositoryImpl(TaskITContext context):base(context)
+       public UserRepositoryImpl(TaskITContext context):base(context)
        {
        }
 

@@ -1,22 +1,18 @@
-﻿using TaskIT.Repository.KorisnikRepositoryF;
-using TaskIT.Repository.OglasZaPosaoRepositoryF;
-using TaskIT.Repository.PoslodavacRepositoryF;
-using TaskIT.Repository.RadnikRadiPosaoRepositoryF;
-using TaskIT.Repository.RadnikRepositoryF;
-using TaskIT.Repository.TipPoslaRepositoryF;
+﻿using TaskIT.Repository.UserRepositoryF;
+using TaskIT.Repository.FinishedJobRepositoryF;
+using TaskIT.Repository.JobAdvertisementRepositoryF;
 
 namespace TaskIT.Repository.UnityOfWork
 {
     public interface UnitOfWork:IDisposable
     {
-        KorisnikRepository Korisnici { get; }
+        UserRepository Users { get; }
 
-        OglasZaPosaoRepository OglasiZaPoslove { get; }
+        JobAdvertisementRepository JobAdvertisements { get; }
 
-        PoslodavacRepository Poslodavci {get;}
-        RadnikRadiPosaoRepository RadniciRadePoslove { get;}
-        RadnikRepository Radnici { get; }
-        TipPoslaRepository TipoviPoslova { get; }
+        FinishedJobRepository FinishedJobs { get; }
+
+
         int Complete();
     } 
 }

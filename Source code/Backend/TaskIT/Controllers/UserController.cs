@@ -1,20 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TaskIT.Model;
 using TaskIT.Repository.UnityOfWork;
 
 namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class RadnikRadiPosaoController
+    public class UserController : Controller
     {
         private readonly TaskITContext context;
+        public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public UnitOfWorkImpl _unitOfWork { get; set; }
-
-        public RadnikRadiPosaoController(TaskITContext context)
+        public UserController(TaskITContext context)
         {
             this.context = context;
-            _unitOfWork = new UnitOfWorkImpl(this.context);
+            unitOfWork = new UnitOfWorkImpl(context);
+
         }
 
     }
