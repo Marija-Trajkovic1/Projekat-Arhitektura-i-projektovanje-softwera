@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace TaskIT.Model
 {
-    public class TaskITContext : DbContext
+    public class TaskITContext : IdentityDbContext<User>
+
     {
         public TaskITContext(DbContextOptions<TaskITContext> op) : base(op)
         {
