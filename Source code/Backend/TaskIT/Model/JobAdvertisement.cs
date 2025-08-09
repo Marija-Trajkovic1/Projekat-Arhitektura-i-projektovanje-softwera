@@ -46,12 +46,12 @@ namespace TaskIT.Model
         public string JobType { get; set; } = string.Empty;
 
         [Required]
-        public int MyEmployerId { get; set; }
+        public string MyEmployerId { get; set; }
         [JsonIgnore]
         public User MyEmployer { get; set; }= new User();
 
         //[JsonIgnore]
-        public int? MyWorkerId { get; set; }
+        public string? MyWorkerId { get; set; }
         [JsonIgnore]
         public User? MyWorker { get; set; } = null!;
     }

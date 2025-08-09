@@ -10,9 +10,9 @@ namespace TaskIT.Model
         public TaskITContext(DbContextOptions<TaskITContext> op) : base(op)
         {
         }
-        public DbSet<User> Korisnici { get; set; }
-        public DbSet<JobAdvertisement> OglasiZaPosao { get; set; }
-        public DbSet<FinishedJob> OdradjeniPoslovi { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<JobAdvertisement> JobAdvertisements { get; set; }
+        public DbSet<FinishedJob> FinishedJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

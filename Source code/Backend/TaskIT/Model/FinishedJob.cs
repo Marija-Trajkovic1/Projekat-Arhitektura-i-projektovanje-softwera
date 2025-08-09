@@ -18,14 +18,14 @@ namespace TaskIT.Model
         public int? WorkerEvaluation { get; set; }
 
         [Required]
-        public int WorkerId { get; set; }
+        public string WorkerId { get; set; }
         [JsonIgnore]
         public User Worker { get; set; } = null!;
 
         public int? EmployerEvaluation { get; set; }
 
         [Required]
-        public int EmployerId { get; set; }
+        public string EmployerId { get; set; }
 
         [JsonIgnore]
         public User Employer { get; set; } = null!;   

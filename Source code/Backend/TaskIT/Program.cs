@@ -19,6 +19,17 @@ builder.Services.AddDbContext<TaskITContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TaskItCS"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<User>()
     .AddEntityFrameworkStores<TaskITContext>();
@@ -32,13 +43,17 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.UseCors("AllowReactApp");
+
 app.MapIdentityApi<User>();
+
+//prebaciti u zaseban fajl
 
 app.MapPost("/logout", async (SignInManager<User> signInManager) =>
 {
     await signInManager.SignOutAsync();
     return Results.Ok("User logged out successfully.");
-});
+}).RequireAuthorization();
 
 app.MapGet("/pingauth", (ClaimsPrincipal user) =>
 {
