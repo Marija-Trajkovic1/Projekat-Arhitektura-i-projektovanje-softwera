@@ -14,5 +14,6 @@ namespace TaskIT.Repository.UnityOfWork
 
 
         int Complete();
+        Task<int> CompleteAsync();
     } 
 }

@@ -31,5 +31,10 @@ namespace TaskIT.Repository.UnityOfWork
         {
             context.Dispose();
         }
+
+        public async Task<int> CompleteAsync()
+        {
+            return await context.SaveChangesAsync();
+        }
     }
 }

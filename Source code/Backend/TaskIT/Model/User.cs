@@ -8,7 +8,7 @@ namespace TaskIT.Model
     public class User : IdentityUser
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [Required]
         [MaxLength(20)]

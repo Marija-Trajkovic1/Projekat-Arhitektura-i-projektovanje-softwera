@@ -21,19 +21,19 @@ namespace TaskIT.Controllers
         }
 
         [HttpGet("FindAllUsers")]
-        public IActionResult FindAllUsers()
+        public async Task<IActionResult> FindAllUsers()
         {
-            var users = context.Users.ToList()
-                .Select(s=>s.ToUserDTO());
-            if (users == null || !users.Any())
+            var users = await context.Users.ToListAsync();
+            var usersDTO=    users.Select(s => s.ToUserDTO());
+            if (usersDTO == null || !usersDTO.Any())
             {
                 return NotFound("No users found.");
             }
-            return Ok(users);
+            return Ok(usersDTO);
         }
 
         [HttpGet("FindUserById/{id}")]
-        public async  Task<IActionResult> FindUserById(string id)
+        public async Task<IActionResult> FindUserById(string id)
         {
             var user = await context.Users.FindAsync(id);
             if (user == null)
@@ -44,21 +44,56 @@ namespace TaskIT.Controllers
         }
 
         [HttpPost("CreateUser")]
-        public IActionResult CreateUser([FromBody] CreateUserRequestDTO userDto)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDTO userCreateDto)
         {
-            if (userDto == null)
+            if (userCreateDto == null)
             {
                 return BadRequest("User data is null.");
             }
-            var user = userDto.ToUserFromCreateUserRequest();
+            var user =  userCreateDto.ToUserFromCreateUserRequest();
             if (user == null)
             {
                 return BadRequest("Invalid user data.");
             }
-            unitOfWork.Users.Add(user);
-            unitOfWork.Complete();
+            await unitOfWork.Users.AddAsync(user);
+            await unitOfWork.CompleteAsync();
             return CreatedAtAction(nameof(FindUserById), new { id = user.Id }, user.ToUserDTO());
         }
 
+        [HttpPut("UpdateUserInformation/{id}")]
+        public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequestDTO userUpdateDto)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+
+            user.Name = userUpdateDto.Name;
+            user.Surname = userUpdateDto.Surname;
+            user.Email = userUpdateDto.Email;
+            user.PhoneNumber = userUpdateDto.PhoneNumber;
+            user.HomeNumber = userUpdateDto.HomeNumber;
+            user.City = userUpdateDto.City;
+            user.Street = userUpdateDto.Street;
+
+            await unitOfWork.CompleteAsync();
+            return Ok(user.ToUserDTO());
+
+        }
+
+        [HttpDelete("DeleteUser/{id}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+            unitOfWork.Users.Remove(user);
+            await unitOfWork.CompleteAsync();
+            return NoContent();
+
+        }
     }
 }

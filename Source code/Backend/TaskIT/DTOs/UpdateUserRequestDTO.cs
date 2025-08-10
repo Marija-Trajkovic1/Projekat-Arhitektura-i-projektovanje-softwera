@@ -1,8 +1,7 @@
 ﻿namespace TaskIT.DTOs
 {
-    public class UserDTO
+    public class UpdateUserRequestDTO
     {
-        public string Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public string Surname { get; set; } = string.Empty;
@@ -22,9 +21,5 @@
         public string Street { get; set; } = string.Empty;
 
         public int HomeNumber { get; set; }
-
-        //public List<JobAdvertisement> UserPostedAdv { get; set; } = new();
-
-        //public List<JobAdvertisement> UserAppliedAdv { get; set; } = new();
     }
 }
