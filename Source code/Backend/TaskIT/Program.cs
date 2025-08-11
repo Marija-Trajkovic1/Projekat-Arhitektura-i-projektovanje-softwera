@@ -4,6 +4,9 @@ using TaskIT.Repository;
 using TaskIT.Hubs;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using TaskIT.Repository.UserRepositoryF;
+using TaskIT.Repository.FinishedJobRepositoryF;
+using TaskIT.Repository.JobAdvertisementRepositoryF;
 
 
 
@@ -39,7 +42,13 @@ builder.Services.AddTransient(typeof(Repository<>), typeof(RepositoryImpl<>));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<UserRepository, UserRepositoryImpl>();
+builder.Services.AddScoped<FinishedJobRepository, FinishedJobRepositoryImpl>();
+builder.Services.AddScoped<JobAdvertisementRepository, JobAdvertisementRepositoryImpl>();
+
+
 builder.Services.AddSignalR();
+
 
 var app = builder.Build();
 

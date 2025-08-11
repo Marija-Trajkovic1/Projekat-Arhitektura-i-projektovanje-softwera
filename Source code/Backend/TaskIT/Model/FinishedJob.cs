@@ -8,10 +8,12 @@ namespace TaskIT.Model
     public class FinishedJob
     {
         [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
 
         [Required]
-        public int JobAdvertisementId { get; set; }
+        public string JobAdvertisementId { get; set; }
+
         [JsonIgnore]
         public JobAdvertisement JobAdvertisement { get; set; } = null!;
 

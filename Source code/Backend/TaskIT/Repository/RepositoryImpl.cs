@@ -9,39 +9,10 @@ namespace TaskIT.Repository
         {
             Context = context;
         }
-        public void Add(TEntity entity)
-        {
-            Context.Set<TEntity>().Add(entity);
-        }
-
-        public void AddRange(IEnumerable<TEntity> entities)
-        {
-            Context.Set<TEntity>().AddRange(entities);
-        }
-
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
-        {
-            return Context.Set<TEntity>().Where(predicate);
-        }
-
-        public TEntity Get(int id)
-        {
-            return Context.Set<TEntity>().Find(id);
-        }
-
-        public IEnumerable<TEntity> GetAll()
-        {
-            return Context.Set<TEntity>().ToList();
-        }
 
         public void Remove(TEntity entity)
         {
             Context.Set<TEntity>().Remove(entity);
-        }
-
-        public void RemoveRange(IEnumerable<TEntity> entities)
-        {
-            Context.Set<TEntity>().RemoveRange(entities);
         }
 
         public async Task AddAsync(TEntity entity)
@@ -49,12 +20,7 @@ namespace TaskIT.Repository
             await Context.Set<TEntity>().AddAsync(entity);
         }
 
-        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
-        {
-            await Context.Set<TEntity>().AddRangeAsync(entities);
-        }
-
-        public async Task<TEntity?> GetAsync(int id)
+        public async Task<TEntity?> GetAsync(string id)
         {
             return await Context.Set<TEntity>().FindAsync(id);
         }
@@ -64,9 +30,41 @@ namespace TaskIT.Repository
             return await Context.Set<TEntity>().ToListAsync();
         }
 
-        public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<TEntity> CreateAsync(TEntity entity)
         {
-            return await Context.Set<TEntity>().Where(predicate).ToListAsync();
+            await Context.Set<TEntity>().AddAsync(entity);
+            await Context.SaveChangesAsync();
+            return entity;
         }
+
+        public async Task<TEntity> DeleteAsync(string id)
+        {
+            var entity = await Context.Set<TEntity>().FindAsync(id);
+            if(entity == null)
+            {
+                throw new KeyNotFoundException($"Entity with ID {id} not found.");
+            }
+
+            Context.Set<TEntity>().Remove(entity);
+            await Context.SaveChangesAsync();
+            return entity;
+        }   
+
+        public async Task<TEntity> UpdateAsync(string id, TEntity entity)
+        {
+            var existingEntity = await Context.Set<TEntity>().FindAsync(id); 
+            if(existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Entity with ID {id} not found.");
+            }
+
+            Context.Entry(existingEntity).CurrentValues.SetValues(entity);
+            await Context.SaveChangesAsync();
+            return existingEntity;
+
+        }
+
+
+
     }
 }

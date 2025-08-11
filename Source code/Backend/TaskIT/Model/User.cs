@@ -8,6 +8,7 @@ namespace TaskIT.Model
     public class User : IdentityUser
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
         [Required]

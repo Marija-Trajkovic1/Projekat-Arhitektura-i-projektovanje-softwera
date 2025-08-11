@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TaskIT.DTOs.UserDTOs; 
 using TaskIT.Mapping;
 using TaskIT.Model;
 using TaskIT.Repository.UnityOfWork;
-using TaskIT.DTOs;
+using TaskIT.Repository.UserRepositoryF;
 
 namespace TaskIT.Controllers
 {
@@ -10,11 +11,14 @@ namespace TaskIT.Controllers
     [Route("[controller]")]
     public class UserController : Controller
     {
-        private readonly TaskITContext context;
+        private readonly TaskITContext context;//kad koristim repository ne treba mi context! ne zelimo direktan pristup bazi u kontroleru
+
+        private readonly UserRepository userRepository; 
         public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public UserController(TaskITContext context)
+        public UserController(TaskITContext context, UserRepository userRepository)
         {
+            this.userRepository = userRepository;
             this.context = context;
             unitOfWork = new UnitOfWorkImpl(context);
 
@@ -23,7 +27,7 @@ namespace TaskIT.Controllers
         [HttpGet("FindAllUsers")]
         public async Task<IActionResult> FindAllUsers()
         {
-            var users = await context.Users.ToListAsync();
+            var users = await userRepository.GetAllAsync();
             var usersDTO=    users.Select(s => s.ToUserDTO());
             if (usersDTO == null || !usersDTO.Any())
             {
@@ -35,7 +39,7 @@ namespace TaskIT.Controllers
         [HttpGet("FindUserById/{id}")]
         public async Task<IActionResult> FindUserById(string id)
         {
-            var user = await context.Users.FindAsync(id);
+            var user = await userRepository.GetAsync(id);
             if (user == null)
             {
                 return NotFound($"User with ID {id} not found.");
@@ -50,32 +54,20 @@ namespace TaskIT.Controllers
             {
                 return BadRequest("User data is null.");
             }
-            var user =  userCreateDto.ToUserFromCreateUserRequest();
+            var user = userCreateDto.ToUserFromCreateUserRequest();
             if (user == null)
             {
                 return BadRequest("Invalid user data.");
             }
-            await unitOfWork.Users.AddAsync(user);
-            await unitOfWork.CompleteAsync();
+            await userRepository.CreateAsync(user);
             return CreatedAtAction(nameof(FindUserById), new { id = user.Id }, user.ToUserDTO());
         }
 
         [HttpPut("UpdateUserInformation/{id}")]
         public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequestDTO userUpdateDto)
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-            {
-                return NotFound($"User with ID {id} not found.");
-            }
-
-            user.Name = userUpdateDto.Name;
-            user.Surname = userUpdateDto.Surname;
-            user.Email = userUpdateDto.Email;
-            user.PhoneNumber = userUpdateDto.PhoneNumber;
-            user.HomeNumber = userUpdateDto.HomeNumber;
-            user.City = userUpdateDto.City;
-            user.Street = userUpdateDto.Street;
+            var userForUpdate = userUpdateDto.ToUserFromUpdateUserRequest(id);
+            var user = await userRepository.UpdateAsync(id, userForUpdate);
 
             await unitOfWork.CompleteAsync();
             return Ok(user.ToUserDTO());
@@ -85,13 +77,8 @@ namespace TaskIT.Controllers
         [HttpDelete("DeleteUser/{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] string id)
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-            {
-                return NotFound($"User with ID {id} not found.");
-            }
-            unitOfWork.Users.Remove(user);
-            await unitOfWork.CompleteAsync();
+
+            await userRepository.DeleteAsync(id);
             return NoContent();
 
         }

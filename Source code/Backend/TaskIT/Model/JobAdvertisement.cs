@@ -8,7 +8,8 @@ namespace TaskIT.Model
     public class JobAdvertisement
     {
         [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
 
         [Required]
         [MaxLength(20)]
@@ -47,11 +48,12 @@ namespace TaskIT.Model
 
         [Required]
         public string MyEmployerId { get; set; }
+
         [JsonIgnore]
         public User MyEmployer { get; set; }= new User();
 
-        //[JsonIgnore]
         public string? MyWorkerId { get; set; }
+
         [JsonIgnore]
         public User? MyWorker { get; set; } = null!;
     }

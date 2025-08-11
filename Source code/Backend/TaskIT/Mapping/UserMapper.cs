@@ -1,8 +1,8 @@
 ﻿using System.Xml.Serialization;
-using TaskIT.DTOs;
+using TaskIT.DTOs.UserDTOs;
 namespace TaskIT.Mapping
 {
-    public static class UserMapping
+    public static class UserMapper
     {
         public static UserDTO ToUserDTO(this User userModel)
         {
@@ -39,6 +39,25 @@ namespace TaskIT.Mapping
                 HomeNumber = userDTO.HomeNumber
             };
         }
+
+        public static User ToUserFromUpdateUserRequest(this UpdateUserRequestDTO userDTO, string id)
+        {
+            if (userDTO == null) return null;
+            return new User
+            {
+                Id = id,
+                Name = userDTO.Name,
+                Surname = userDTO.Surname,
+                Email = userDTO.Email,
+                PhoneNumber = userDTO.PhoneNumber,
+                City = userDTO.City,
+                Street = userDTO.Street,
+                HomeNumber = userDTO.HomeNumber
+            };
+        }   
+
+
+
     }
 
 }

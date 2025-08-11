@@ -13,9 +13,6 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
             get { return TaskITContext as TaskITContext; }
         }
 
-        public IEnumerable<JobAdvertisement> CreateNewJob(JobAdvertisement advertisement, int idEmployer)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

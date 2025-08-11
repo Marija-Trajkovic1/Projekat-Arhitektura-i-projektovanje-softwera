@@ -1,0 +1,67 @@
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Principal;
+using TaskIT.DTOs.JobAdvertisementDTOs;
+
+namespace TaskIT.Mapping
+{
+    public static class JobAdvertisementMapper
+    {
+        public static JobAdvertisementDTO ToJobAdvertisementDTO(this JobAdvertisement jobAdvertisementModel)
+        {
+            if(jobAdvertisementModel == null) return null;
+            return new JobAdvertisementDTO()
+            {
+                Id = jobAdvertisementModel.Id,
+                Title = jobAdvertisementModel.Title,
+                ShortDescription = jobAdvertisementModel.ShortDescription,
+                City = jobAdvertisementModel.City,
+                Street = jobAdvertisementModel.Street,
+                HomeNumber = jobAdvertisementModel.HomeNumber,
+                DateOfExecution = jobAdvertisementModel.DateOfExecution,
+                WorkDuration = jobAdvertisementModel.WorkDuration,
+                IsAvailable = jobAdvertisementModel.IsAvailable,
+                JobSalary = jobAdvertisementModel.JobSalary,
+                JobType = jobAdvertisementModel.JobType
+            };
+        }
+
+        public static JobAdvertisement ToJobAdvertisementFromCreateJobAdvertisementRequest(this CreateJobAdvertisementRequestDTO jobAdvertisementDTO)
+        {
+            if (jobAdvertisementDTO == null) return null;
+            return new JobAdvertisement()
+            {
+                Title = jobAdvertisementDTO.Title,
+                ShortDescription = jobAdvertisementDTO.ShortDescription,
+                City = jobAdvertisementDTO.City,
+                Street = jobAdvertisementDTO.Street,
+                HomeNumber = jobAdvertisementDTO.HomeNumber,
+                DateOfExecution = jobAdvertisementDTO.DateOfExecution,
+                WorkDuration = jobAdvertisementDTO.WorkDuration,
+                IsAvailable = true, 
+                JobSalary = jobAdvertisementDTO.JobSalary,
+                JobType = jobAdvertisementDTO.JobType,
+                
+            };
+        }
+
+        public static JobAdvertisement ToJobAdvertisementFromUpdateJobAdvertisementRequest(this UpdateJobAdvertisementRequestDTO jobAdvertisementDTO, string id)
+        {
+            if (jobAdvertisementDTO == null) return null;
+            return new JobAdvertisement
+            {
+                Id = id,
+                Title = jobAdvertisementDTO.Title,
+                ShortDescription = jobAdvertisementDTO.ShortDescription,
+                City = jobAdvertisementDTO.City,
+                Street = jobAdvertisementDTO.Street,
+                HomeNumber = jobAdvertisementDTO.HomeNumber,
+                DateOfExecution = jobAdvertisementDTO.DateOfExecution,
+                WorkDuration = jobAdvertisementDTO.WorkDuration,
+                IsAvailable = jobAdvertisementDTO.IsAvailable,
+                JobSalary = jobAdvertisementDTO.JobSalary,
+                JobType = jobAdvertisementDTO.JobType
+            };
+        }
+    }
+}

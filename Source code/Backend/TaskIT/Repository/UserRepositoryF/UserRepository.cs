@@ -4,8 +4,6 @@
 namespace TaskIT.Repository.UserRepositoryF
 {
     public interface UserRepository:Repository<User>
-    {
-        
-       
+    { 
     }
 }

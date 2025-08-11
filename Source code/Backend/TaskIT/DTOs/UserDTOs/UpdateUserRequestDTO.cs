@@ -1,6 +1,6 @@
-﻿namespace TaskIT.DTOs
+﻿namespace TaskIT.DTOs.UserDTOs
 {
-    public class CreateUserRequestDTO
+    public class UpdateUserRequestDTO
     {
         public string Name { get; set; } = string.Empty;
 
