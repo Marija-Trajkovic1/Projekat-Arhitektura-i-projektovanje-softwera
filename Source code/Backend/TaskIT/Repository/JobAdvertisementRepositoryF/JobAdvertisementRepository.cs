@@ -1,7 +1,9 @@
-﻿namespace TaskIT.Repository.JobAdvertisementRepositoryF
+﻿using TaskIT.DTOs.JobAdvertisementDTOs;
+
+namespace TaskIT.Repository.JobAdvertisementRepositoryF
 {
     public interface JobAdvertisementRepository:Repository<JobAdvertisement>
     {
-        
+       public Task<List<JobAdvertisementDTO>> GetAllJobsForUserAsync(string employerId);
     }
 }

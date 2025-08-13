@@ -64,7 +64,9 @@ namespace TaskIT.Repository
 
         }
 
-
-
+         Task<bool> Repository<TEntity>.EntityExist(string entityId)
+        {
+            return Context.Set<TEntity>().AnyAsync(e => EF.Property<string>(e, "Id") == entityId);
+        }
     }
 }

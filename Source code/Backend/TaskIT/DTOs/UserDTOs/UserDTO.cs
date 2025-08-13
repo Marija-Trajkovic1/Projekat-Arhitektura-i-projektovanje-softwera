@@ -1,4 +1,6 @@
-﻿namespace TaskIT.DTOs.UserDTOs
+﻿using TaskIT.DTOs.JobAdvertisementDTOs;
+
+namespace TaskIT.DTOs.UserDTOs
 {
     public class UserDTO
     {
@@ -23,8 +25,8 @@
 
         public int HomeNumber { get; set; }
 
-        //public List<JobAdvertisement> UserPostedAdv { get; set; } = new();
+        public List<JobAdvertisementDTO> UserPostedAdv { get; set; } = new();
 
-        //public List<JobAdvertisement> UserAppliedAdv { get; set; } = new();
+        public List<JobAdvertisementDTO> UserAppliedAdv { get; set; } = new();
     }
 }

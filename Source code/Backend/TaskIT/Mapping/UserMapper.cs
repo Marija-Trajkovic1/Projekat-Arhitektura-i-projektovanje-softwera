@@ -14,12 +14,12 @@ namespace TaskIT.Mapping
                 Surname = userModel.Surname,
                 Email = userModel.Email,
                 PhoneNumber = userModel.PhoneNumber,
-                AccountName = userModel.UserName, 
-                Password = userModel.PasswordHash, 
-                PasswordConfirmation = userModel.PasswordHash, 
+                AccountName = userModel.UserName,  
                 City = userModel.City,
                 Street = userModel.Street,
-                HomeNumber = userModel.HomeNumber
+                HomeNumber = userModel.HomeNumber,
+                UserPostedAdv = userModel.UserPostedAdv.Select(x=>x.ToJobAdvertisementDTO()).ToList(),
+                UserAppliedAdv=userModel.UserAppliedAdv.Select(x => x.ToJobAdvertisementDTO()).ToList()
             };
         }
 
@@ -33,7 +33,6 @@ namespace TaskIT.Mapping
                 Email = userDTO.Email,
                 PhoneNumber = userDTO.PhoneNumber,
                 UserName = userDTO.AccountName, 
-                PasswordHash = userDTO.Password, 
                 City = userDTO.City,
                 Street = userDTO.Street,
                 HomeNumber = userDTO.HomeNumber

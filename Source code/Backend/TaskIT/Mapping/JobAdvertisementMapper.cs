@@ -26,7 +26,7 @@ namespace TaskIT.Mapping
             };
         }
 
-        public static JobAdvertisement ToJobAdvertisementFromCreateJobAdvertisementRequest(this CreateJobAdvertisementRequestDTO jobAdvertisementDTO)
+        public static JobAdvertisement ToJobAdvertisementFromCreateJobAdvertisementRequest(this CreateJobAdvertisementRequestDTO jobAdvertisementDTO, string employerId)
         {
             if (jobAdvertisementDTO == null) return null;
             return new JobAdvertisement()
@@ -41,7 +41,7 @@ namespace TaskIT.Mapping
                 IsAvailable = true, 
                 JobSalary = jobAdvertisementDTO.JobSalary,
                 JobType = jobAdvertisementDTO.JobType,
-                
+                MyEmployerId = employerId
             };
         }
 

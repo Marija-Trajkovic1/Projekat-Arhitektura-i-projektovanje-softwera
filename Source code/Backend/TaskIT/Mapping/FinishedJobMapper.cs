@@ -1,6 +1,29 @@
-﻿namespace TaskIT.Mapping
+﻿using TaskIT.DTOs.FinishedJobDTOs;
+
+namespace TaskIT.Mapping
 {
-    public class FinishedJobMapper
+    public static class FinishedJobMapper
     {
+        public static FinishedJobDTO ToFinishedJobDTO(this FinishedJob finishedJobModel)
+        {
+            if (finishedJobModel == null) return null;
+            return new FinishedJobDTO()
+            {
+                Id = finishedJobModel.Id,
+                JobAdvertisementId = finishedJobModel.JobAdvertisementId,
+                WorkerId = finishedJobModel.WorkerId,
+                EmployerId = finishedJobModel.EmployerId
+            };
+        }
+        public static FinishedJob ToFinishedJobFromCreateFinishedJobRequest(this CreateFinishedJobRequestDTO finishedJobDTO, string workerId, string employerId)
+        {
+            if (finishedJobDTO == null) return null;
+            return new FinishedJob()
+            {
+                JobAdvertisementId = finishedJobDTO.JobAdvertisementId,
+                WorkerId = workerId,
+                EmployerId = employerId
+            };
+        }
     }
 }

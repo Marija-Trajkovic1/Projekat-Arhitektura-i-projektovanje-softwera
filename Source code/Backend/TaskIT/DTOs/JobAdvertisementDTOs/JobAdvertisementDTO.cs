@@ -17,10 +17,10 @@ namespace TaskIT.DTOs.JobAdvertisementDTOs
         public bool IsAvailable { get; set; }
         public int JobSalary { get; set; }
         public string JobType { get; set; } = string.Empty;
-        //public string MyEmployerId { get; set; } = string.Empty;
+        public string MyEmployerId { get; set; } = string.Empty;
         //public User MyEmployer { get; set; } = new User();
 
-        //public string? MyWorkerId { get; set; }
+        public string? MyWorkerId { get; set; }
         //public User? MyWorker { get; set; } = null!;
     }
 }
