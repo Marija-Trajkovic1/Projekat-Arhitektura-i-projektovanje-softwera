@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace TaskIT.DTOs.JobAdvertisementDTOs
 {
-    public class JobAdvertisementDTO
+    public class JobAdvertisementResponse
     {
         public string Id { get; set; }
         public string Title { get; set; } = string.Empty;
@@ -18,9 +18,6 @@ namespace TaskIT.DTOs.JobAdvertisementDTOs
         public int JobSalary { get; set; }
         public string JobType { get; set; } = string.Empty;
         public string MyEmployerId { get; set; } = string.Empty;
-        //public User MyEmployer { get; set; } = new User();
-
         public string? MyWorkerId { get; set; }
-        //public User? MyWorker { get; set; } = null!;
     }
 }

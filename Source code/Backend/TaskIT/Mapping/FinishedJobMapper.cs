@@ -4,10 +4,10 @@ namespace TaskIT.Mapping
 {
     public static class FinishedJobMapper
     {
-        public static FinishedJobDTO ToFinishedJobDTO(this FinishedJob finishedJobModel)
+        public static FinishedJobResponse ToFinishedJobDTO(this FinishedJob finishedJobModel)
         {
             if (finishedJobModel == null) return null;
-            return new FinishedJobDTO()
+            return new FinishedJobResponse()
             {
                 Id = finishedJobModel.Id,
                 JobAdvertisementId = finishedJobModel.JobAdvertisementId,

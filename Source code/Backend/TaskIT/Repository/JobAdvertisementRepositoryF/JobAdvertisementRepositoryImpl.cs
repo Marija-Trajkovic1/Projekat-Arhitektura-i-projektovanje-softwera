@@ -17,7 +17,7 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
             get { return TaskITContext as TaskITContext; }
         }
 
-        public async Task<List<JobAdvertisementDTO>> GetAllJobsForUserAsync(string employerId)
+        public async Task<List<JobAdvertisementResponse>> GetAllJobsForUserAsync(string employerId)
         {
             var userJobAdvertisements = await TaskITContext.JobAdvertisements
                 .Where(j => j.MyEmployerId == employerId).ToListAsync();

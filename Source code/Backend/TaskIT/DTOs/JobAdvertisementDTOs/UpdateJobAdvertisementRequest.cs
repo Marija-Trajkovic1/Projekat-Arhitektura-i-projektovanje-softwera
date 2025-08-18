@@ -1,6 +1,6 @@
 ﻿namespace TaskIT.DTOs.JobAdvertisementDTOs
 {
-    public class UpdateJobAdvertisementRequestDTO
+    public class UpdateJobAdvertisementRequest
     {
         public string Title { get; set; } = string.Empty;
         public string ShortDescription { get; set; } = string.Empty;
@@ -12,7 +12,5 @@
         public bool IsAvailable { get; set; }
         public int JobSalary { get; set; }
         public string JobType { get; set; } = string.Empty;
-
-        //vlasnik posla?
     }
 }

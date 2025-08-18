@@ -13,7 +13,7 @@ namespace TaskIT.DTOs.UserDTOs
         public string City { get; set; } = string.Empty;
         public string Street { get; set; } = string.Empty;
         public int HomeNumber { get; set; }
-        public List<JobAdvertisementDTO> UserPostedAdv { get; set; } = new();
-        public List<JobAdvertisementDTO> UserAppliedAdv { get; set; } = new();
+        public List<JobAdvertisementResponse> UserPostedAdv { get; set; } = new();
+        public List<JobAdvertisementResponse> UserAppliedAdv { get; set; } = new();
     }
 }

@@ -13,7 +13,7 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
         {
             get { return TaskITContext as TaskITContext; }
         }
-        public async Task<List<FinishedJobDTO>> GetAllFinishedJobsByWorkerIdAsync(string workerId)
+        public async Task<List<FinishedJobResponse>> GetAllFinishedJobsByWorkerIdAsync(string workerId)
         {
             var finishedJobs = await TaskITContext.FinishedJobs
                 .Where(fj => fj.WorkerId == workerId)

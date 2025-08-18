@@ -7,10 +7,10 @@ namespace TaskIT.Mapping
 {
     public static class JobAdvertisementMapper
     {
-        public static JobAdvertisementDTO ToJobAdvertisementDTO(this JobAdvertisement jobAdvertisementModel)
+        public static JobAdvertisementResponse ToJobAdvertisementDTO(this JobAdvertisement jobAdvertisementModel)
         {
             if(jobAdvertisementModel == null) return null;
-            return new JobAdvertisementDTO()
+            return new JobAdvertisementResponse()
             {
                 Id = jobAdvertisementModel.Id,
                 Title = jobAdvertisementModel.Title,
@@ -26,7 +26,7 @@ namespace TaskIT.Mapping
             };
         }
 
-        public static JobAdvertisement ToJobAdvertisementFromCreateJobAdvertisementRequest(this CreateJobAdvertisementRequestDTO jobAdvertisementDTO, string employerId)
+        public static JobAdvertisement ToJobAdvertisementFromCreateJobAdvertisementRequest(this CreateJobAdvertisementRequest jobAdvertisementDTO, string employerId)
         {
             if (jobAdvertisementDTO == null) return null;
             return new JobAdvertisement()
@@ -45,7 +45,7 @@ namespace TaskIT.Mapping
             };
         }
 
-        public static JobAdvertisement ToJobAdvertisementFromUpdateJobAdvertisementRequest(this UpdateJobAdvertisementRequestDTO jobAdvertisementDTO, string id)
+        public static JobAdvertisement ToJobAdvertisementFromUpdateJobAdvertisementRequest(this UpdateJobAdvertisementRequest jobAdvertisementDTO, string id)
         {
             if (jobAdvertisementDTO == null) return null;
             return new JobAdvertisement
