@@ -43,15 +43,11 @@ namespace TaskIT.Controllers
             return Ok(jobAdvertisements);
         }
 
-        //[HttpGet("GetJobAdvertisementByType")]
-        //public async Task<IActionResult> GetJobAdvertisementByType([FromQuery] QueryObject queryObject)
-
         [HttpPost("AddNewJobAdvertisement/{employerId}")]
         public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string employerId)
         {
             if (await userRepository.EntityExist(employerId)) {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromCreateJobAdvertisementRequest(employerId);
-
 
                 if (jobAdvertisement == null)
                 {
@@ -61,9 +57,7 @@ namespace TaskIT.Controllers
                 return CreatedAtAction(nameof(FindJobAdvertisementById), new { id = jobAdvertisement.Id }, jobAdvertisement.ToJobAdvertisementDTO());
 
             }
-
             return BadRequest($"Employer with id {employerId} doesn't exist!");
-
         }
 
         [HttpPut("UpdateJobAdvertisement/{jobAdvertisementId}")]

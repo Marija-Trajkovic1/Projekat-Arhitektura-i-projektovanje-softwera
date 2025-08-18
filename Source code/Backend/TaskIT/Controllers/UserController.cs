@@ -44,7 +44,8 @@ namespace TaskIT.Controllers
             {
                 return NotFound($"User with ID {id} not found.");
             }
-            return Ok(user.ToUserDTO());
+            var userResponse = user.ToUserDTO();
+            return Ok(userResponse);
         }
 
         [HttpPost("CreateUser")]
