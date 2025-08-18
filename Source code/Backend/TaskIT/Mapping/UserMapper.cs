@@ -4,17 +4,17 @@ namespace TaskIT.Mapping
 {
     public static class UserMapper
     {
-        public static UserDTO ToUserDTO(this User userModel)
+        public static UserResponse ToUserDTO(this User userModel)
         {
             if (userModel == null) return null;
-            return new UserDTO
+            return new UserResponse
             {
                 Id = userModel.Id,
                 Name = userModel.Name,
                 Surname = userModel.Surname,
                 Email = userModel.Email,
                 PhoneNumber = userModel.PhoneNumber,
-                AccountName = userModel.UserName,  
+                UserName = userModel.UserName,  
                 City = userModel.City,
                 Street = userModel.Street,
                 HomeNumber = userModel.HomeNumber,
@@ -23,35 +23,32 @@ namespace TaskIT.Mapping
             };
         }
 
-        public static User ToUserFromCreateUserRequest(this CreateUserRequestDTO userDTO)
+        public static User ToUserFromCreateUserRequest(this CreateUserRequest createUser)
         {
-            if (userDTO == null) return null;
+            if (createUser == null) return null;
             return new User
             {
-                Name = userDTO.Name,
-                Surname = userDTO.Surname,
-                Email = userDTO.Email,
-                PhoneNumber = userDTO.PhoneNumber,
-                UserName = userDTO.AccountName, 
-                City = userDTO.City,
-                Street = userDTO.Street,
-                HomeNumber = userDTO.HomeNumber
+                Name = createUser.Name,
+                Surname = createUser.Surname,
+                Email = createUser.Email,
+                PhoneNumber = createUser.PhoneNumber,
+                UserName = createUser.AccountName,
+                City = createUser.City,
+                Street = createUser.Street,
+                HomeNumber = createUser.HomeNumber
             };
         }
 
-        public static User ToUserFromUpdateUserRequest(this UpdateUserRequestDTO userDTO, string id)
+        public static User ToUserFromUpdateUserRequest(this UpdateUserRequest updateUser, string id)
         {
-            if (userDTO == null) return null;
+            if (updateUser == null) return null;
             return new User
             {
-                Id = id,
-                Name = userDTO.Name,
-                Surname = userDTO.Surname,
-                Email = userDTO.Email,
-                PhoneNumber = userDTO.PhoneNumber,
-                City = userDTO.City,
-                Street = userDTO.Street,
-                HomeNumber = userDTO.HomeNumber
+                Email = updateUser.Email,
+                PhoneNumber = updateUser.PhoneNumber,
+                City = updateUser.City,
+                Street = updateUser.Street,
+                HomeNumber = updateUser.HomeNumber
             };
         }   
 

@@ -48,7 +48,7 @@ namespace TaskIT.Controllers
         }
 
         [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDTO userCreateDto)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest userCreateDto)
         {
             if (userCreateDto == null)
             {
@@ -64,7 +64,7 @@ namespace TaskIT.Controllers
         }
 
         [HttpPut("UpdateUserInformation/{id}")]
-        public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequestDTO userUpdateDto)
+        public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequest userUpdateDto)
         {
             var userForUpdate = userUpdateDto.ToUserFromUpdateUserRequest(id);
             var user = await userRepository.UpdateAsync(id, userForUpdate);
