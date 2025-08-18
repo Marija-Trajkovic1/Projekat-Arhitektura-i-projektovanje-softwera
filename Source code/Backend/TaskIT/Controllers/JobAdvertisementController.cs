@@ -47,7 +47,7 @@ namespace TaskIT.Controllers
         //public async Task<IActionResult> GetJobAdvertisementByType([FromQuery] QueryObject queryObject)
 
         [HttpPost("AddNewJobAdvertisement/{employerId}")]
-        public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequestDTO jobAdvertisementDTO, [FromRoute] string employerId)
+        public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string employerId)
         {
             if (await userRepository.EntityExist(employerId)) {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromCreateJobAdvertisementRequest(employerId);
@@ -67,7 +67,7 @@ namespace TaskIT.Controllers
         }
 
         [HttpPut("UpdateJobAdvertisement/{jobAdvertisementId}")]
-        public async Task<IActionResult> UpdateJobAdvertisement([FromBody] UpdateJobAdvertisementRequestDTO jobAdvertisementDTO, [FromRoute] string jobAdvertisementId)
+        public async Task<IActionResult> UpdateJobAdvertisement([FromBody] UpdateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string jobAdvertisementId)
         {
             if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
             {
