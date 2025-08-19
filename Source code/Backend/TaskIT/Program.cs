@@ -82,7 +82,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapHub<NoviOglasHub>("/noviOglasHub");
+app.MapHub<NewJobAdvertisementHub>("/newJobAdvertisementHub");
 
 app.MapControllers();
 

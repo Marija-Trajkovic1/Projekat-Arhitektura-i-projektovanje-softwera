@@ -18,5 +18,13 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
            return userJobAdvertisements;
 
         }
+
+        public async Task<List<JobAdvertisement>> GetAvailableJobAdvertisementsAsync(string employerId)
+        {
+            var availableJobAdvertisements = await context.JobAdvertisements
+                .Where(j=>j.IsAvailable==true)
+                .Where(j => j.MyEmployerId == null || j.MyEmployerId != employerId).ToListAsync();
+            return availableJobAdvertisements;
+        }
     }
 }

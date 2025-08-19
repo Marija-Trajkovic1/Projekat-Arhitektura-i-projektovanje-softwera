@@ -2,9 +2,9 @@
 
 namespace TaskIT.Hubs
 {
-    public class NoviOglasHub:Hub
+    public class NewJobAdvertisementHub:Hub
     {
-        public async Task ObavestiONovomPoslu(string user, string message)
+        public async Task NotifyAboutNewJobAdvertisement(string user, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", user, message);
 

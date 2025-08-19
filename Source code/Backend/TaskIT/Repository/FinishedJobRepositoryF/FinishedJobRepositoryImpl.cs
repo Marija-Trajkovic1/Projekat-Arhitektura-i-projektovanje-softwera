@@ -4,7 +4,7 @@ using TaskIT.Model;
 
 namespace TaskIT.Repository.FinishedJobRepositoryF
 {
-    public class FinishedJobRepositoryImpl:RepositoryImpl<FinishedJob>, FinishedJobRepository
+    public class FinishedJobRepositoryImpl : RepositoryImpl<FinishedJob>, FinishedJobRepository
     {
         public FinishedJobRepositoryImpl(TaskITContext context) : base(context)
         {
@@ -15,9 +15,34 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
                 .Where(fj => fj.WorkerId == workerId)
                 .ToListAsync();
             return finishedJobs;
+        }
+
+        public async Task<FinishedJob> WorkerEvaluateAsync(string finishedJobId, int workerEvaluation)
+        {
+            var finishedJob = await context.FinishedJobs.FindAsync(finishedJobId);
+            if (finishedJob == null)
+            {
+                throw new KeyNotFoundException($"Finished job with ID {finishedJobId} not found.");
+            }
+            finishedJob.WorkerEvaluation = workerEvaluation;
+            context.FinishedJobs.Update(finishedJob);
+            await context.SaveChangesAsync();
+            return finishedJob;
+        }
+
+        public async Task<FinishedJob> EmployerEvaluateAsync(string finishedJobId, int employerEvaluation)
+        {
+            var finishedJob = await context.FinishedJobs.FindAsync(finishedJobId);
+            if (finishedJob == null)
+            {
+                throw new KeyNotFoundException($"Finished job with ID {finishedJobId} not found.");
+            }
+            finishedJob.EmployerEvaluation = employerEvaluation;
+            context.FinishedJobs.Update(finishedJob);
+            await context.SaveChangesAsync();
+            return finishedJob;
 
         }
-        
-}
+    }
    
 }

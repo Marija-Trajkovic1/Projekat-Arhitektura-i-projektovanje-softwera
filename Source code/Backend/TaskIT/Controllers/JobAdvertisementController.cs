@@ -40,6 +40,18 @@ namespace TaskIT.Controllers
             return Ok(jobAdvertisements);
         }
 
+        [HttpGet("FindAvailableJobs")]
+        public async Task<IActionResult> FindAvailableJobs(string employerId)
+        {
+            if (employerId == null)
+            {
+                return BadRequest("Worker ID can not be null!");
+            }
+            var availableJobAdvertisements = await jobAdvertisementRepository.GetAvailableJobAdvertisementsAsync(employerId);
+            var availableJobAdvertisementsDTO = availableJobAdvertisements.Select(a => a.ToJobAdvertisementDTO());
+            return Ok(availableJobAdvertisementsDTO);
+        }
+
         [HttpPost("AddNewJobAdvertisement/{employerId}")]
         public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string employerId)
         {

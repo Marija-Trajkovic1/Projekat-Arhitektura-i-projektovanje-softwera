@@ -15,29 +15,17 @@ namespace TaskIT.Mapping
                 EmployerId = finishedJobModel.EmployerId
             };
         }
-        public static FinishedJob ToFinishedJobFromCreateFinishedJobRequest(this CreateFinishedJobRequest finishedJobDTO, string workerId, string employerId)
+        public static FinishedJob ToFinishedJobFromCreateFinishedJobRequest(this CreateFinishedJobRequest finishedJobDTO)
         {
             if (finishedJobDTO == null) return null;
             return new FinishedJob()
             {
                 JobAdvertisementId = finishedJobDTO.JobAdvertisementId,
-                WorkerId = workerId,
-                EmployerId = employerId
+                WorkerId = finishedJobDTO.WorkerId,
+                WorkerEvaluation = finishedJobDTO.WorkerEvaluation,
+                EmployerId = finishedJobDTO.EmployerId,
+                EmployerEvaluation = finishedJobDTO.EmployerEvaluation
             };
         }
-
-        //public static FinishedJob ToFinishedJobFromUpdateFinishedJobRequest(this UpdateFinishedJobRequestDTO finishedJobDTO, string workerId, string employerId)
-        //{
-        //    if (finishedJobDTO == null) return null;
-        //    return new FinishedJob()
-        //    {
-        //        Id = finishedJobDTO.Id,
-        //        JobAdvertisementId = finishedJobDTO.JobAdvertisementId,
-        //        WorkerEvaluation = finishedJobDTO.WorkerEvaluation,
-        //        WorkerId = workerId,
-        //        EmployerEvaluation = finishedJobDTO.EmployerEvaluation,
-        //        EmployerId = employerId
-        //    };
-        //}
     }
 }
