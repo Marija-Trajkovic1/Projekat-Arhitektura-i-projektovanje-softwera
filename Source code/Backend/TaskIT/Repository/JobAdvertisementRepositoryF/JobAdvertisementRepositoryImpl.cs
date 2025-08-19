@@ -9,20 +9,13 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
     {
         public JobAdvertisementRepositoryImpl(TaskITContext context):base(context)
         {
-            
         }
 
-        public TaskITContext TaskITContext
+        public async Task<List<JobAdvertisement>> GetAllUserPostedJobsAsync(string employerId)
         {
-            get { return TaskITContext as TaskITContext; }
-        }
-
-        public async Task<List<JobAdvertisementResponse>> GetAllJobsForUserAsync(string employerId)
-        {
-            var userJobAdvertisements = await TaskITContext.JobAdvertisements
+            var userJobAdvertisements = await context.JobAdvertisements
                 .Where(j => j.MyEmployerId == employerId).ToListAsync();
-            var userJobsAdvertisementsDTO= userJobAdvertisements.Select(j=>j.ToJobAdvertisementDTO()).ToList();
-            return userJobsAdvertisementsDTO;
+           return userJobAdvertisements;
 
         }
     }

@@ -15,7 +15,7 @@ namespace TaskIT.Mapping
                 EmployerId = finishedJobModel.EmployerId
             };
         }
-        public static FinishedJob ToFinishedJobFromCreateFinishedJobRequest(this CreateFinishedJobRequestDTO finishedJobDTO, string workerId, string employerId)
+        public static FinishedJob ToFinishedJobFromCreateFinishedJobRequest(this CreateFinishedJobRequest finishedJobDTO, string workerId, string employerId)
         {
             if (finishedJobDTO == null) return null;
             return new FinishedJob()

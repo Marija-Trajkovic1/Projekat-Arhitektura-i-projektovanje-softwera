@@ -11,7 +11,6 @@ namespace TaskIT.Controllers
     [Route("[controller]")]
     public class JobAdvertisementController : ControllerBase
     {
-        private readonly TaskITContext context;
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
         private readonly UserRepository userRepository;
         public UnitOfWorkImpl unitOfWork { get; set; }
@@ -20,9 +19,7 @@ namespace TaskIT.Controllers
         {
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.userRepository = userRepository;
-            this.context = context;
             unitOfWork = new UnitOfWorkImpl(context);
-
         }
 
         [HttpGet("FindAJobAdvertisement")]
@@ -39,7 +36,7 @@ namespace TaskIT.Controllers
         [HttpGet("FindAllJobAdvertisementsForUser")]
         public async Task<IActionResult> FindAllJobAdvertisementsForUser(string employerId)
         {
-            var jobAdvertisements = await jobAdvertisementRepository.GetAllJobsForUserAsync(employerId);
+            var jobAdvertisements = await jobAdvertisementRepository.GetAllUserPostedJobsAsync(employerId);
             return Ok(jobAdvertisements);
         }
 
@@ -75,12 +72,11 @@ namespace TaskIT.Controllers
         [HttpDelete("DeleteJobAdvertisement/{jobAdvertisementId}")]
         public async Task<IActionResult> DeleteJobAdvertisement([FromRoute] string jobAdvertisementId)
         {
-            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId));
+            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
             {
                 await jobAdvertisementRepository.DeleteAsync(jobAdvertisementId);
-                return NoContent();
-
             }
+            return NoContent();
         }
 
     }

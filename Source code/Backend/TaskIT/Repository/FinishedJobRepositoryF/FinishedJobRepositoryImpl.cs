@@ -9,17 +9,12 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
         public FinishedJobRepositoryImpl(TaskITContext context) : base(context)
         {
         }
-        public TaskITContext TaskITContext
+        public async Task<List<FinishedJob>> GetAllFinishedJobsByWorkerAsync(string workerId)
         {
-            get { return TaskITContext as TaskITContext; }
-        }
-        public async Task<List<FinishedJobResponse>> GetAllFinishedJobsByWorkerIdAsync(string workerId)
-        {
-            var finishedJobs = await TaskITContext.FinishedJobs
+            var finishedJobs = await context.FinishedJobs
                 .Where(fj => fj.WorkerId == workerId)
                 .ToListAsync();
-            var finishedJobsDTO= finishedJobs.Select(fj => fj.ToFinishedJobDTO()).ToList();
-            return finishedJobsDTO;
+            return finishedJobs;
 
         }
         

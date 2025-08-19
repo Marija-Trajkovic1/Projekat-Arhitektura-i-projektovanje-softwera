@@ -12,15 +12,6 @@ namespace TaskIT.Repository.UserRepositoryF
        public UserRepositoryImpl(TaskITContext context):base(context)
        {
        }
-
-       public TaskITContext TaskITContext
-       {
-            get { return TaskITContext as TaskITContext; }
-       }
-
-       
-
-       
-            
+     
     }
 }

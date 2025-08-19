@@ -5,7 +5,7 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
 {
     public interface FinishedJobRepository : Repository<FinishedJob>
     {
-        Task<List<FinishedJobResponse>> GetAllFinishedJobsByWorkerIdAsync(string workerId);
+        Task<List<FinishedJob>> GetAllFinishedJobsByWorkerAsync(string workerId);
         
     }
 

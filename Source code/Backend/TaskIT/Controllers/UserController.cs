@@ -11,24 +11,20 @@ namespace TaskIT.Controllers
     [Route("[controller]")]
     public class UserController : Controller
     {
-        private readonly TaskITContext context;//kad koristim repository ne treba mi context! ne zelimo direktan pristup bazi u kontroleru
-
         private readonly UserRepository userRepository; 
         public UnitOfWorkImpl unitOfWork { get; set; }
 
         public UserController(TaskITContext context, UserRepository userRepository)
         {
             this.userRepository = userRepository;
-            this.context = context;
             unitOfWork = new UnitOfWorkImpl(context);
-
         }
 
         [HttpGet("FindAllUsers")]
         public async Task<IActionResult> FindAllUsers()
         {
             var users = await userRepository.GetAllAsync();
-            var usersDTO=    users.Select(s => s.ToUserDTO());
+            var usersDTO = users.Select(s => s.ToUserDTO());
             if (usersDTO == null || !usersDTO.Any())
             {
                 return NotFound("No users found.");
@@ -49,13 +45,13 @@ namespace TaskIT.Controllers
         }
 
         [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest userCreateDto)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUser)
         {
-            if (userCreateDto == null)
+            if (createUser == null)
             {
                 return BadRequest("User data is null.");
             }
-            var user = userCreateDto.ToUserFromCreateUserRequest();
+            var user = createUser.ToUserFromCreateUserRequest();
             if (user == null)
             {
                 return BadRequest("Invalid user data.");
@@ -65,11 +61,10 @@ namespace TaskIT.Controllers
         }
 
         [HttpPut("UpdateUserInformation/{id}")]
-        public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequest userUpdateDto)
+        public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequest updateUser)
         {
-            var userForUpdate = userUpdateDto.ToUserFromUpdateUserRequest(id);
+            var userForUpdate = updateUser.ToUserFromUpdateUserRequest(id);
             var user = await userRepository.UpdateAsync(id, userForUpdate);
-
             await unitOfWork.CompleteAsync();
             return Ok(user.ToUserDTO());
 
@@ -78,10 +73,8 @@ namespace TaskIT.Controllers
         [HttpDelete("DeleteUser/{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] string id)
         {
-
             await userRepository.DeleteAsync(id);
             return NoContent();
-
         }
     }
 }

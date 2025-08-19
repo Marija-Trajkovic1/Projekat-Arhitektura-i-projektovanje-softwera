@@ -1,6 +1,6 @@
 ﻿namespace TaskIT.DTOs.FinishedJobDTOs
 {
-    public class CreateFinishedJobRequestDTO
+    public class CreateFinishedJobRequest
     {
         public string JobAdvertisementId { get; set; }
         public int? WorkerEvaluation { get; set; }
