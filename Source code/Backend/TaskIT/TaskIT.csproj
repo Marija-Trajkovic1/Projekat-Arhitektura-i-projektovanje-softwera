@@ -7,16 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Communication\**" />
-    <Content Remove="Communication\**" />
-    <EmbeddedResource Remove="Communication\**" />
-    <None Remove="Communication\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>

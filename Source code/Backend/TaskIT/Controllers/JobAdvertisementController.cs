@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using TaskIT.DTOs.JobAdvertisementDTOs;
+using TaskIT.Hubs;
 using TaskIT.Mapping;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.UnityOfWork;
@@ -12,12 +14,14 @@ namespace TaskIT.Controllers
     public class JobAdvertisementController : ControllerBase
     {
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
+        private readonly IHubContext<TaskItHub> hubContext;
         private readonly UserRepository userRepository;
         public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public JobAdvertisementController(TaskITContext context, JobAdvertisementRepository jobAdvertisementRepository, UserRepository userRepository)
+        public JobAdvertisementController(TaskITContext context, JobAdvertisementRepository jobAdvertisementRepository, UserRepository userRepository, IHubContext<TaskItHub> hubContext)
         {
             this.jobAdvertisementRepository = jobAdvertisementRepository;
+            this.hubContext = hubContext;
             this.userRepository = userRepository;
             unitOfWork = new UnitOfWorkImpl(context);
         }

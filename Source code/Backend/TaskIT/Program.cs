@@ -15,6 +15,7 @@ using TaskIT.Repository.JobAdvertisementRepositoryF;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<TaskITContext>(options =>
@@ -28,7 +29,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
+                .AllowAnyHeader()
                 .AllowAnyMethod();
         });
 });
@@ -45,10 +46,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserRepository, UserRepositoryImpl>();
 builder.Services.AddScoped<FinishedJobRepository, FinishedJobRepositoryImpl>();
 builder.Services.AddScoped<JobAdvertisementRepository, JobAdvertisementRepositoryImpl>();
-
-
-builder.Services.AddSignalR();
-
 
 var app = builder.Build();
 
@@ -82,8 +79,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapHub<NewJobAdvertisementHub>("/newJobAdvertisementHub");
-
 app.MapControllers();
+
+app.MapHub<TaskItHub>("/taskItHub");
+
 
 app.Run();

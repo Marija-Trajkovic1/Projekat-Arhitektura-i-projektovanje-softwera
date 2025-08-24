@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TaskIT.DTOs.UserDTOs; 
+using Microsoft.AspNetCore.SignalR;
+using TaskIT.DTOs.UserDTOs;
+using TaskIT.Hubs;
 using TaskIT.Mapping;
 using TaskIT.Model;
 using TaskIT.Repository.UnityOfWork;
@@ -12,11 +14,13 @@ namespace TaskIT.Controllers
     public class UserController : Controller
     {
         private readonly UserRepository userRepository; 
+        private readonly IHubContext<TaskItHub> hubContext;
         public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public UserController(TaskITContext context, UserRepository userRepository)
+        public UserController(TaskITContext context, UserRepository userRepository, IHubContext<TaskItHub> hubContext)
         {
             this.userRepository = userRepository;
+            this.hubContext = hubContext;
             unitOfWork = new UnitOfWorkImpl(context);
         }
 

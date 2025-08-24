@@ -1,19 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using System.Drawing;
+using TaskIT.DTOs.FinishedJobDTOs;
+using TaskIT.Hubs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.UnityOfWork;
-using TaskIT.DTOs.FinishedJobDTOs;
-using System.Drawing;
 
 namespace TaskIT.Controllers
 {
     public class FinishedJobController : Controller
     {
         private readonly FinishedJobRepository finishedJobRepository;
+        private readonly IHubContext<TaskItHub> hubContext;
         public UnitOfWorkImpl unitOfWork { get; set; }
-        public FinishedJobController(TaskITContext context, FinishedJobRepository finishedJobRepository)
+        public FinishedJobController(TaskITContext context, FinishedJobRepository finishedJobRepository, IHubContext<TaskItHub> hubContext)
         {
             this.finishedJobRepository = finishedJobRepository;
+            this.hubContext = hubContext;
             unitOfWork = new UnitOfWorkImpl(context);
         }
 
