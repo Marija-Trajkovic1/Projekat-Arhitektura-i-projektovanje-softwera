@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using TaskIT.Communication.JobAdvertisementNotificationServices;
 using TaskIT.DTOs.JobAdvertisementDTOs;
 using TaskIT.Hubs;
 using TaskIT.Mapping;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.UnityOfWork;
+using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
+using TaskIT.Repository.WorkerJobTypeFollowingF;
 
 namespace TaskIT.Controllers
 {
@@ -14,15 +17,19 @@ namespace TaskIT.Controllers
     public class JobAdvertisementController : ControllerBase
     {
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
-        private readonly IHubContext<TaskItHub> hubContext;
+        private readonly JobAdvertisementNotificationService jobAdvertisementNotificationService;
         private readonly UserRepository userRepository;
+        private readonly UserFollowingRepository userFollowingRepository;
+        private readonly WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository;
         public UnitOfWorkImpl unitOfWork { get; set; }
 
-        public JobAdvertisementController(TaskITContext context, JobAdvertisementRepository jobAdvertisementRepository, UserRepository userRepository, IHubContext<TaskItHub> hubContext)
+        public JobAdvertisementController(TaskITContext context, JobAdvertisementRepository jobAdvertisementRepository, UserRepository userRepository, UserFollowingRepository userFollowingRepository, WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository, JobAdvertisementNotificationService jobAdvertisementNotificationService)
         {
             this.jobAdvertisementRepository = jobAdvertisementRepository;
-            this.hubContext = hubContext;
+            this.jobAdvertisementNotificationService = jobAdvertisementNotificationService;
             this.userRepository = userRepository;
+            this.userFollowingRepository = userFollowingRepository;
+            this.workerJobTypeFollowingRepository = workerJobTypeFollowingRepository;
             unitOfWork = new UnitOfWorkImpl(context);
         }
 
@@ -66,7 +73,21 @@ namespace TaskIT.Controllers
                 {
                     return BadRequest("Invalid job advertisement data.");
                 }
-                await jobAdvertisementRepository.CreateAsync(jobAdvertisement);
+
+               var createdJobAdvertisement = await jobAdvertisementRepository.CreateAsync(jobAdvertisement);
+
+                var jobAdvertisementId = createdJobAdvertisement.Id;
+                var employer = await userRepository.GetAsync(employerId);
+                var employerUserName = employer.UserName;
+
+                var employerFollowersIds = await userFollowingRepository.GetFollowersIds(employerId);
+                await jobAdvertisementNotificationService.NotifyNewJobAdvertisement(employerFollowersIds, jobAdvertisementId, employerUserName);
+
+                var jobType = jobAdvertisement.JobType;
+                var jobFollowersIds = await workerJobTypeFollowingRepository.GetWorkersByJobTypeAsync(jobType);
+                await jobAdvertisementNotificationService.NotifyNewJobAdvertisementByType(jobFollowersIds, jobAdvertisementId, jobType);
+
+
                 return CreatedAtAction(nameof(FindJobAdvertisementById), new { id = jobAdvertisement.Id }, jobAdvertisement.ToJobAdvertisementDTO());
 
             }
@@ -81,6 +102,120 @@ namespace TaskIT.Controllers
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromUpdateJobAdvertisementRequest(jobAdvertisementId);
                 await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
                 return Ok(jobAdvertisement.ToJobAdvertisementDTO());
+            }
+
+            var jobAdvertisementUpdated = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
+            var employerId = jobAdvertisementUpdated.MyEmployerId;
+            var jobAdvertisementTitle = jobAdvertisementUpdated.Title;
+            var employer = await userRepository.GetAsync(employerId);
+            var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
+
+            await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdate(followersIds, jobAdvertisementTitle);
+            return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+        }
+
+        [HttpPut("ApplayForJob/{jobAdvertisementId}")]
+        public async Task<IActionResult> ApplayForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        {
+            if(!await userRepository.EntityExist(workerId))
+            {
+                return BadRequest($"Worker with id {workerId} doesn't exist!");
+            }
+            if(await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
+            {
+                var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
+                if (jobAdvertisement == null)
+                {
+                    return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+                }
+                if (jobAdvertisement.MyWorkerId != null)
+                {
+                    return BadRequest("This job advertisement is already assigned to a worker.");
+                }
+                jobAdvertisement.MyWorkerId = workerId;
+                jobAdvertisement.IsAvailable= false;
+                await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+
+                var employerId= jobAdvertisement.MyEmployerId; 
+                var jobAdvertisementTitle= jobAdvertisement.Title;
+                var worker = await userRepository.GetAsync(workerId);
+                var workerUserName = worker.UserName;
+
+                await jobAdvertisementNotificationService.NotifyApplied(employerId, jobAdvertisementId, jobAdvertisementTitle, workerUserName);
+                return Ok("You have successfully applied for the job.");
+            }
+
+            return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+        }
+
+        [HttpPut("DeclineApplicationForJobByEmployer/{jobAdvertisementId}")]
+        public async Task<IActionResult>DeclineaApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        {
+            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
+            {
+                var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
+                if (jobAdvertisement == null)
+                {
+                    return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+                }
+                if (jobAdvertisement.MyWorkerId == null)
+                {
+                    return BadRequest("This job advertisement is not assigned to any worker.");
+                }
+                if (jobAdvertisement.MyWorkerId != workerId)
+                {
+                    return BadRequest("This job advertisement is assigned to a different worker.");
+                }
+                jobAdvertisement.MyWorkerId = null;
+                jobAdvertisement.IsAvailable = true;
+                await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+
+                var jobAdvertisementTitle = jobAdvertisement.Title;
+                var employerId = jobAdvertisement.MyEmployerId;
+                var employer = await userRepository.GetAsync(employerId);
+                var employerUserName = employer.UserName;
+
+                var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
+
+
+                await jobAdvertisementNotificationService.NotifyDeclined(workerId, jobAdvertisementId, jobAdvertisementTitle, employerUserName);
+                await jobAdvertisementNotificationService.NotifyAvailableAgain(followersIds, jobAdvertisementId, jobAdvertisementTitle);
+                return Ok("Your application was declined!");
+            }
+            return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+        }
+
+        [HttpPut("DeclineApplicationForJobByWorker/{jobAdvertisementId}")]
+        public async Task<IActionResult> DeclineaApplicationForJobByWorkerBeforeAcception([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        {
+            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
+            {
+                var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
+                if (jobAdvertisement == null)
+                {
+                    return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+                }
+                if (jobAdvertisement.MyWorkerId == null)
+                {
+                    return BadRequest("This job advertisement is not assigned to any worker.");
+                }
+                if (jobAdvertisement.MyWorkerId != workerId)
+                {
+                    return BadRequest("This job advertisement is assigned to a different worker.");
+                }
+                jobAdvertisement.MyWorkerId = null;
+                jobAdvertisement.IsAvailable = true;
+                await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+
+                var jobAdvertisementTitle = jobAdvertisement.Title;
+                var employerId = jobAdvertisement.MyEmployerId;
+                var worker = await userRepository.GetAsync(workerId);
+                var workerUserName = worker.UserName;
+                var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
+
+                await jobAdvertisementNotificationService.NotifyDeclinedByWorker(employerId, jobAdvertisementId, jobAdvertisementTitle, workerUserName);
+                await jobAdvertisementNotificationService.NotifyAvailableAgain(followersIds, jobAdvertisementId, jobAdvertisementTitle);
+                return Ok("Your application was declined!");
             }
             return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
         }

@@ -13,6 +13,9 @@ namespace TaskIT.Model
         public DbSet<User> Users { get; set; }
         public DbSet<JobAdvertisement> JobAdvertisements { get; set; }
         public DbSet<FinishedJob> FinishedJobs { get; set; }
+        public DbSet<UserFollowing> UserFollowings { get; set; }
+
+        public DbSet<WorkerJobTypeFollowing> WorkerJobTypeFollowings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
