@@ -13,7 +13,7 @@ namespace TaskIT.Communication.UserFollowingNotificationServices
         }
         public async Task NotifyFollow(string followedUserId, string followerName)
         {
-            await taskItHubContext.Clients.Group(followedUserId).SendAsync("FollowNotification", folllowerName);
+            await taskItHubContext.Clients.Group(followedUserId).SendAsync("FollowNotification", followerName);
         }
 
         public async Task NotifyUnfollow(string unfollowedUserId, string unfollowerName)

@@ -1,12 +1,16 @@
 global using Microsoft.EntityFrameworkCore;
 global using TaskIT.Model;
-using TaskIT.Repository;
-using TaskIT.Hubs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Security.Claims;
-using TaskIT.Repository.UserRepositoryF;
+using System.Text;
+using TaskIT.Hubs;
+using TaskIT.Repository;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
+using TaskIT.Repository.UserRepositoryF;
 
 
 
@@ -34,10 +38,33 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<TaskITContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],   // appsettings.json
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<User>()
-    .AddEntityFrameworkStores<TaskITContext>();
-builder.Services.AddTransient(typeof(Repository<>), typeof(RepositoryImpl<>));
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -51,23 +78,6 @@ var app = builder.Build();
 
 app.UseCors("AllowReactApp");
 
-app.MapIdentityApi<User>();
-
-//prebaciti u zaseban fajl
-
-app.MapPost("/logout", async (SignInManager<User> signInManager) =>
-{
-    await signInManager.SignOutAsync();
-    return Results.Ok("User logged out successfully.");
-}).RequireAuthorization();
-
-app.MapGet("/pingauth", (ClaimsPrincipal user) =>
-{
-    var email = user.FindFirstValue(ClaimTypes.Email);
-    return Results.Json(new { Email = email }); 
-
-}).RequireAuthorization();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -76,6 +86,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

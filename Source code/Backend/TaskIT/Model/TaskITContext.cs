@@ -55,6 +55,18 @@ namespace TaskIT.Model
                 .WithMany()
                 .HasForeignKey(p => p.JobAdvertisementId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserFollowing>()
+                .HasOne<User>(uf => uf.Follower)
+                .WithMany()
+                .HasForeignKey(uf => uf.FollowerId)
+                .OnDelete(DeleteBehavior.NoAction); // ili Restrict
+
+            modelBuilder.Entity<UserFollowing>()
+                .HasOne<User>(uf => uf.Followed)
+                .WithMany()
+                .HasForeignKey(uf => uf.FollowedId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

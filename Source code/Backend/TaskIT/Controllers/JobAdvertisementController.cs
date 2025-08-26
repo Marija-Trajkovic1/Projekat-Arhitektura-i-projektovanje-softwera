@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 using TaskIT.Communication.JobAdvertisementNotificationServices;
 using TaskIT.DTOs.JobAdvertisementDTOs;
 using TaskIT.Hubs;
@@ -33,6 +35,7 @@ namespace TaskIT.Controllers
             unitOfWork = new UnitOfWorkImpl(context);
         }
 
+        [Authorize]
         [HttpGet("FindAJobAdvertisement")]
         public async Task<IActionResult> FindJobAdvertisementById(string id)
         {
@@ -44,6 +47,7 @@ namespace TaskIT.Controllers
             return Ok(jobAdvertisement.ToJobAdvertisementDTO());
         }
 
+        [Authorize]
         [HttpGet("FindAllJobAdvertisementsForUser")]
         public async Task<IActionResult> FindAllJobAdvertisementsForUser(string employerId)
         {
@@ -51,9 +55,11 @@ namespace TaskIT.Controllers
             return Ok(jobAdvertisements);
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpGet("FindAvailableJobs")]
-        public async Task<IActionResult> FindAvailableJobs(string employerId)
+        public async Task<IActionResult> FindAvailableJobs()
         {
+            var employerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (employerId == null)
             {
                 return BadRequest("Worker ID can not be null!");
@@ -63,9 +69,11 @@ namespace TaskIT.Controllers
             return Ok(availableJobAdvertisementsDTO);
         }
 
-        [HttpPost("AddNewJobAdvertisement/{employerId}")]
-        public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string employerId)
+        [Authorize(Roles = "Employer")]
+        [HttpPost("AddNewJobAdvertisement")]
+        public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO)
         {
+            var employerId = GetUserId();
             if (await userRepository.EntityExist(employerId)) {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromCreateJobAdvertisementRequest(employerId);
 
@@ -94,30 +102,31 @@ namespace TaskIT.Controllers
             return BadRequest($"Employer with id {employerId} doesn't exist!");
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpPut("UpdateJobAdvertisement/{jobAdvertisementId}")]
         public async Task<IActionResult> UpdateJobAdvertisement([FromBody] UpdateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string jobAdvertisementId)
         {
             if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
             {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromUpdateJobAdvertisementRequest(jobAdvertisementId);
-                await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+                var jobAdvertisementUpdated = await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+                var employerId = jobAdvertisementUpdated.MyEmployerId;
+                var jobAdvertisementTitle = jobAdvertisementUpdated.Title;
+                var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
+
+                await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdate(followersIds, jobAdvertisementTitle);
+
                 return Ok(jobAdvertisement.ToJobAdvertisementDTO());
             }
-
-            var jobAdvertisementUpdated = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
-            var employerId = jobAdvertisementUpdated.MyEmployerId;
-            var jobAdvertisementTitle = jobAdvertisementUpdated.Title;
-            var employer = await userRepository.GetAsync(employerId);
-            var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
-
-            await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdate(followersIds, jobAdvertisementTitle);
             return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpPut("ApplayForJob/{jobAdvertisementId}")]
-        public async Task<IActionResult> ApplayForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        public async Task<IActionResult> ApplayForJob([FromRoute] string jobAdvertisementId)
         {
-            if(!await userRepository.EntityExist(workerId))
+            var workerId= GetUserId();
+            if (!await userRepository.EntityExist(workerId))
             {
                 return BadRequest($"Worker with id {workerId} doesn't exist!");
             }
@@ -144,10 +153,10 @@ namespace TaskIT.Controllers
                 await jobAdvertisementNotificationService.NotifyApplied(employerId, jobAdvertisementId, jobAdvertisementTitle, workerUserName);
                 return Ok("You have successfully applied for the job.");
             }
-
             return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpPut("DeclineApplicationForJobByEmployer/{jobAdvertisementId}")]
         public async Task<IActionResult>DeclineaApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
         {
@@ -185,6 +194,7 @@ namespace TaskIT.Controllers
             return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpPut("DeclineApplicationForJobByWorker/{jobAdvertisementId}")]
         public async Task<IActionResult> DeclineaApplicationForJobByWorkerBeforeAcception([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
         {
@@ -220,6 +230,7 @@ namespace TaskIT.Controllers
             return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
         }
 
+        [Authorize(Roles ="Employer")]
         [HttpDelete("DeleteJobAdvertisement/{jobAdvertisementId}")]
         public async Task<IActionResult> DeleteJobAdvertisement([FromRoute] string jobAdvertisementId)
         {
@@ -229,6 +240,11 @@ namespace TaskIT.Controllers
             }
             return NoContent();
         }
+
+
+        private string GetUserId() =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
+
 
     }
 }

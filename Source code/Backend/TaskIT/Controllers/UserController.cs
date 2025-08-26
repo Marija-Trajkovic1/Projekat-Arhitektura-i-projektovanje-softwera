@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 using TaskIT.DTOs.UserDTOs;
 using TaskIT.Hubs;
 using TaskIT.Mapping;
@@ -24,6 +26,7 @@ namespace TaskIT.Controllers
             unitOfWork = new UnitOfWorkImpl(context);
         }
 
+        [Authorize]
         [HttpGet("FindAllUsers")]
         public async Task<IActionResult> FindAllUsers()
         {
@@ -36,48 +39,37 @@ namespace TaskIT.Controllers
             return Ok(usersDTO);
         }
 
-        [HttpGet("FindUserById/{id}")]
-        public async Task<IActionResult> FindUserById(string id)
+        [Authorize]
+        [HttpGet("FindUser")]
+        public async Task<IActionResult> FindUser()
         {
-            var user = await userRepository.GetAsync(id);
+            var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userRepository.GetAsync(userId);
             if (user == null)
             {
-                return NotFound($"User with ID {id} not found.");
+                return NotFound($"User with not found.");
             }
             var userResponse = user.ToUserDTO();
             return Ok(userResponse);
         }
 
-        [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUser)
+        [Authorize]
+        [HttpPut("UpdateUserInformation")]
+        public async Task<IActionResult> UpdateUserInformation([FromBody] UpdateUserRequest updateUser)
         {
-            if (createUser == null)
-            {
-                return BadRequest("User data is null.");
-            }
-            var user = createUser.ToUserFromCreateUserRequest();
-            if (user == null)
-            {
-                return BadRequest("Invalid user data.");
-            }
-            await userRepository.CreateAsync(user);
-            return CreatedAtAction(nameof(FindUserById), new { id = user.Id }, user.ToUserDTO());
-        }
-
-        [HttpPut("UpdateUserInformation/{id}")]
-        public async Task<IActionResult> UpdateUserInformation([FromRoute] string id, [FromBody] UpdateUserRequest updateUser)
-        {
-            var userForUpdate = updateUser.ToUserFromUpdateUserRequest(id);
-            var user = await userRepository.UpdateAsync(id, userForUpdate);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userForUpdate = updateUser.ToUserFromUpdateUserRequest(userId);
+            var user = await userRepository.UpdateAsync(userId, userForUpdate);
             await unitOfWork.CompleteAsync();
             return Ok(user.ToUserDTO());
-
         }
 
-        [HttpDelete("DeleteUser/{id}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] string id)
+        [Authorize]
+        [HttpDelete("DeleteUser")]
+        public async Task<IActionResult> DeleteUser()
         {
-            await userRepository.DeleteAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            await userRepository.DeleteAsync(userId);
             return NoContent();
         }
     }

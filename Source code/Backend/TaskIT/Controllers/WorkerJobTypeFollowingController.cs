@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskIT.Communication.WorkerJobTypeFollowingServices;
 using TaskIT.DTOs.WorkerJobTypeDTOs;
 using TaskIT.Mapping;
@@ -19,6 +20,7 @@ namespace TaskIT.Controllers
             this.workerJobTypeFollowingService = workerJobTypeFollowingService;
         }
 
+        [Authorize(Roles ="Worker")]
         [HttpPost("AddNewFollowing")]
         public async Task<IActionResult> AddNewFollowing([FromBody] CreateWorkerJobTypeFollowingRequest createWorkerJobType)
         {

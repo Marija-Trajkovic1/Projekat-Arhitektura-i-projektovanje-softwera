@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using TaskIT.Communication.UserFollowingNotificationServices;
+using TaskIT.DTOs.UserFollowingDTOs;
 using TaskIT.Hubs;
 using TaskIT.Repository.UnityOfWork;
 using TaskIT.Repository.UserFollowingRepositoryF;
@@ -25,6 +27,7 @@ namespace TaskIT.Controllers
             unitOfWork = new UnitOfWorkImpl(context);
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpPost("NewFollowing/{followerUserId}")]
         public async Task<IActionResult> NewFollowing([FromRoute] string followerUserId, [FromBody] string followedUserId)
         {
@@ -46,18 +49,19 @@ namespace TaskIT.Controllers
             return Ok("User succesfuly followed!");
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpDelete("UnfollowEmployer/{followerUserId}")]
-        public async Task<IActionResult> UnfollowEmployer([FromBody] string followerUserId, [FromBody] string followedUserId)
+        public async Task<IActionResult> UnfollowEmployer([FromBody] UserUnfollowRequest userUnfollowDTO)
         {
-            var followerUser = await userRepository.EntityExist(followerUserId);
-            var followedUser = await userRepository.EntityExist(followedUserId);
+            var followerUser = await userRepository.EntityExist(userUnfollowDTO.FollowerUserId);
+            var followedUser = await userRepository.EntityExist(userUnfollowDTO.FollowedUserId);
 
             if (!followerUser || !followedUser)
             {
                 return NotFound("Users dont't exist!");
             }
 
-            var unfollowing = await userFollowingRepository.GetFollowingForUnfollow(followerUserId, followedUserId);
+            var unfollowing = await userFollowingRepository.GetFollowingForUnfollow(userUnfollowDTO.FollowerUserId, userUnfollowDTO.FollowedUserId);
 
             if (unfollowing == null)
             {
@@ -66,13 +70,11 @@ namespace TaskIT.Controllers
 
             await userFollowingRepository.DeleteAsync(unfollowing.Id);
 
-            var follower = userRepository.GetAsync(followerUserId);
+            var follower = userRepository.GetAsync(userUnfollowDTO.FollowerUserId);
             var followerName = follower.Result.UserName;
 
-            await userFollowingNotificationService.NotifyUnfollow(followedUserId, followerName);
+            await userFollowingNotificationService.NotifyUnfollow(userUnfollowDTO.FollowerUserId, followerName);
             return Ok("User succesfuly unfollowed!");
-
-
         }
     }
 }
