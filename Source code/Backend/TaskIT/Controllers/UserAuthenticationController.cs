@@ -32,9 +32,7 @@ namespace TaskIT.Controllers
             var result= await userManager.CreateAsync(user, registerNewUserDTO.Password);
 
             if (!result.Succeeded)
-            {
                 return BadRequest(result.Errors);
-            }
 
             await userManager.AddToRoleAsync(user, registerNewUserDTO.Role);
 

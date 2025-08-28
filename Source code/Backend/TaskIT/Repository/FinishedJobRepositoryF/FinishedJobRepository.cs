@@ -8,6 +8,8 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
         Task<List<FinishedJob>> GetAllFinishedJobsByWorkerAsync(string workerId);
         Task<FinishedJob> WorkerEvaluateAsync(string finishedJobId, int workerEvaluation);
         Task<FinishedJob> EmployerEvaluateAsync(string finishedJobId, int workerEvaluation);
+        Task<List<int>> GetAllEvaluationsOfWorkerAsync(string workerId);
+        Task<List<int>> GetAllEvaluationsOfEmployerAsync(string employerId);
 
     }
 

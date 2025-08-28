@@ -9,7 +9,7 @@ namespace TaskIT.Repository.UserFollowingRepositoryF
         {
         }
 
-        public async Task<UserFollowing> GetFollowingForUnfollow(string followerUserId, string followedUserId)
+        public async Task<UserFollowing> GetFollowing(string followerUserId, string followedUserId)
         {
            var followingForUnfollow = await context.UserFollowings.FirstOrDefaultAsync(f => f.FollowerId == followerUserId && f.FollowedId == followedUserId);
            return followingForUnfollow;

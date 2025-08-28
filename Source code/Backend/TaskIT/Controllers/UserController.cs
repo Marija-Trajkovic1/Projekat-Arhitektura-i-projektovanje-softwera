@@ -16,14 +16,9 @@ namespace TaskIT.Controllers
     public class UserController : Controller
     {
         private readonly UserRepository userRepository; 
-        private readonly IHubContext<TaskItHub> hubContext;
-        public UnitOfWorkImpl unitOfWork { get; set; }
-
-        public UserController(TaskITContext context, UserRepository userRepository, IHubContext<TaskItHub> hubContext)
+        public UserController(UserRepository userRepository)
         {
             this.userRepository = userRepository;
-            this.hubContext = hubContext;
-            unitOfWork = new UnitOfWorkImpl(context);
         }
 
         [Authorize]
@@ -32,10 +27,8 @@ namespace TaskIT.Controllers
         {
             var users = await userRepository.GetAllAsync();
             var usersDTO = users.Select(s => s.ToUserDTO());
-            if (usersDTO == null || !usersDTO.Any())
-            {
+            if (usersDTO == null || !usersDTO.Any()) 
                 return NotFound("No users found.");
-            }
             return Ok(usersDTO);
         }
 
@@ -45,10 +38,8 @@ namespace TaskIT.Controllers
         {
             var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await userRepository.GetAsync(userId);
-            if (user == null)
-            {
+            if (user == null) 
                 return NotFound($"User with not found.");
-            }
             var userResponse = user.ToUserDTO();
             return Ok(userResponse);
         }
@@ -60,7 +51,6 @@ namespace TaskIT.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var userForUpdate = updateUser.ToUserFromUpdateUserRequest(userId);
             var user = await userRepository.UpdateAsync(userId, userForUpdate);
-            await unitOfWork.CompleteAsync();
             return Ok(user.ToUserDTO());
         }
 

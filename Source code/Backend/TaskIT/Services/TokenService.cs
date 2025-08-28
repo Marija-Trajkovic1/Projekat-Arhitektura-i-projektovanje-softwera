@@ -32,7 +32,7 @@ namespace TaskIT.Services
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var authSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
+            var authSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["JWT:Key"]));
             var token = new JwtSecurityToken (
                 issuer: configuration["JWT:ValidIssuer"],
                 audience: configuration["JWT:ValidAudience"],

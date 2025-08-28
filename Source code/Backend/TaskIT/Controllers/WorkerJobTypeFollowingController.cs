@@ -38,10 +38,9 @@ namespace TaskIT.Controllers
         {
             var workersIds = await workerJobTypeFollowingRepository.GetWorkersByJobTypeAsync(jobType);
             if(workersIds == null || workersIds.Count == 0)
-            {
                 return NotFound("No workers found for the specified job type.");
-            }
             return Ok(workersIds);
         }
+
     }
 }

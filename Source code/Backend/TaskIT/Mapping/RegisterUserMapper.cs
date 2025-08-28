@@ -12,6 +12,7 @@ namespace TaskIT.Mapping
             {
                 Name = registerNewUserDTO.Name,
                 Surname = registerNewUserDTO.Surname,
+                UserName = registerNewUserDTO.UserName,
                 City = registerNewUserDTO.City,
                 Street = registerNewUserDTO.Street,
                 HomeNumber = registerNewUserDTO.HomeNumber,

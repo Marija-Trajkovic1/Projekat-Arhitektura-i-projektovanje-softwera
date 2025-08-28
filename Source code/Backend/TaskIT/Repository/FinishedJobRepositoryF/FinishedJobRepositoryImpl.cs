@@ -43,6 +43,24 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
             return finishedJob;
 
         }
+
+        public async Task<List<int>> GetAllEvaluationsOfWorkerAsync(string workerId)
+        {
+            var finishedJobsPoints = await context.FinishedJobs
+                .Where(fj => fj.WorkerId == workerId)
+                .Select(fj => fj.WorkerEvaluation ?? 0) // Assuming 0 for null evaluations
+                .ToListAsync();
+            return finishedJobsPoints;
+        }
+
+        public async Task<List<int>> GetAllEvaluationsOfEmployerAsync(string employerId)
+        {
+            var finishedJobsPoints = await context.FinishedJobs
+                .Where(fj => fj.WorkerId == employerId)
+                .Select(fj => fj.WorkerEvaluation ?? 0) // Assuming 0 for null evaluations
+                .ToListAsync();
+            return finishedJobsPoints;
+        }
     }
    
 }

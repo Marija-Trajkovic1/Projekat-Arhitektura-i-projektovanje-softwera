@@ -3,25 +3,25 @@ global using TaskIT.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Security.Claims;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using TaskIT.Hubs;
-using TaskIT.Repository;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
+using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
+using TaskIT.Repository.WorkerJobTypeFollowingF;
+using TaskIT.Services;
 
 
 
 //global using Microsoft.EntityFrameworkCore.SqlServer;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSignalR();
-
 builder.Services.AddControllers();
+
 builder.Services.AddDbContext<TaskITContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("TaskItCS"));
@@ -63,18 +63,55 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddAuthorization();
-
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<UserRepository, UserRepositoryImpl>();
 builder.Services.AddScoped<FinishedJobRepository, FinishedJobRepositoryImpl>();
 builder.Services.AddScoped<JobAdvertisementRepository, JobAdvertisementRepositoryImpl>();
+builder.Services.AddScoped<UserFollowingRepository, UserFollowingRepositoryImpl>();
+builder.Services.AddScoped<WorkerJobTypeFollowingRepository, WorkerJobTypeFollowingRepositoryImpl>();
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskIT API", Version = "v1" });
+
+    // JWT Authorization
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token."
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await RolesGenerator.SeedRoles(roleManager);
+}
 
 app.UseCors("AllowReactApp");
 
@@ -86,14 +123,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.MapHub<TaskItHub>("/taskItHub");
-
 
 app.Run();

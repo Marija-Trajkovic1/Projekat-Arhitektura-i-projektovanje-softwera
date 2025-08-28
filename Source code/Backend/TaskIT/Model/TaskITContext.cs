@@ -33,21 +33,21 @@ namespace TaskIT.Model
                 .HasOne(o => o.MyWorker)
                 .WithMany(k => k.UserAppliedAdv)
                 .HasForeignKey(o => o.MyWorkerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Veza OdradjeniPosao -> Radnik
             modelBuilder.Entity<FinishedJob>()
                 .HasOne(p => p.Worker)
                 .WithMany()
                 .HasForeignKey(p => p.WorkerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Veza OdradjeniPosao -> Poslodavac
             modelBuilder.Entity<FinishedJob>()
                 .HasOne(p => p.Employer)
                 .WithMany()
                 .HasForeignKey(p => p.EmployerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Veza OdradjeniPosao -> Oglas
             modelBuilder.Entity<FinishedJob>()
@@ -60,13 +60,13 @@ namespace TaskIT.Model
                 .HasOne<User>(uf => uf.Follower)
                 .WithMany()
                 .HasForeignKey(uf => uf.FollowerId)
-                .OnDelete(DeleteBehavior.NoAction); // ili Restrict
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<UserFollowing>()
                 .HasOne<User>(uf => uf.Followed)
                 .WithMany()
                 .HasForeignKey(uf => uf.FollowedId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
