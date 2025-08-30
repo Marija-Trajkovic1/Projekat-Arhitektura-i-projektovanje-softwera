@@ -32,8 +32,15 @@ function Login() {
 
       login(user, token, role);
 
-      if (role === "Worker") navigate("/worker");
-      else navigate("/");
+      alert("Uspesno ste se logovali!");
+
+      if (role === "Worker") {
+        navigate("/review-jobs");
+      } else if (role === "Employer") {
+        navigate("/posted-jobs");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError("Your email and password are incorrect!");
     }
@@ -51,6 +58,7 @@ function Login() {
         <input
           type="email"
           placeholder="Email"
+          name="email"
           value={loginCredentials.email}
           onChange={handleChange}
           className="border p-2 w-full mb-3 rounded"
@@ -59,6 +67,7 @@ function Login() {
         <input
           type="password"
           placeholder="Password"
+          name="password"
           value={loginCredentials.password}
           onChange={handleChange}
           className="border p-2 w-full mb-3 rounded"
