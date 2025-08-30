@@ -1,35 +1,14 @@
-import { HubConnectionBuilder } from "@microsoft/signalr";
+import {BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
+import NavBar from "./pages/Home/NavBar";
 
 function App() {
-  const [connection, setConnection] = useState();
-
-  const notifyNewUser = async (username, group)=>{
-    try {
-      //initiate connection 
-      const connection = new HubConnectionBuilder()
-        .withURL("https://localhost:5170/newjobadvertisementHub")
-        .configureLogging(LogLevel.Information)
-        .build();
-
-        connection.on("ReceiveMessage", (username, message) => {
-          console.log(`New message from ${username}: ${message}`);
-        })
-
-        await connection.start();
-
-        await connection.invoke()
-
-    } catch (error) {
-      
-    }
-  }
-
-
   return (
-    <div>
-
-    </div>
+    <Router>
+      <NavBar />
+      <AppRoutes />
+    </Router>
   )
 }
 
-export default App
+export default App;
