@@ -18,6 +18,11 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
            return userJobAdvertisements;
 
         }
+        public IQueryable<JobAdvertisement> GetAllQueryable()
+        {
+            return context.JobAdvertisements
+                .AsQueryable();
+        }
 
         public async Task<List<JobAdvertisement>> GetAvailableJobAdvertisementsAsync(string employerId)
         {

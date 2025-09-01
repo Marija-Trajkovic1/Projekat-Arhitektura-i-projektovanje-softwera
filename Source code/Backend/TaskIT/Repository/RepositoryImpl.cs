@@ -38,7 +38,9 @@ namespace TaskIT.Repository
                 throw new KeyNotFoundException($"Entity with ID {id} not found.");
             }
 
+            context.Entry(entity).Property("Id").CurrentValue = id;
             context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
             await context.SaveChangesAsync();
             return existingEntity;
         }

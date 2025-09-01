@@ -1,40 +1,60 @@
 import { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({});
 
-export const AuthProvider = ({ children }) => {
+export default function AuthProvider ({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [role, setRole] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [role, setRole] = useState(localStorage.getItem("role") || null);
+  const [loading, setLoading] = useState(true);
+
+  const updateAuth = ({ token, user, role }) => {
+    setToken(token);
+    setUser(user);
+    setRole(role);
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('role', role);
+  }
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const validateToken = async () => {
     const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
 
-    if (storedToken) setToken(storedToken);
-    if (storedRole) setRole(storedRole);
-
-    if (storedUser) {
+    if (storedToken && storedUser && storedRole) {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error("Error parsing stored user:", error);
-        setUser(null);
-        localStorage.removeItem("user");
+        await axios.get("https://localhost:7260/User/FindUserForProfile", {
+            headers: { Authorization: `Bearer ${storedToken}` },
+        });
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        setRole(storedRole.toUpperCase());
+      } catch (e) {
+        if (e.response?.status === 401) {
+            console.error("Nevažeći token, odjavljujem se:", e);
+            logout();
+          } else {
+            console.error("Greška prilikom validacije tokena:", e);
+          }
       }
     }
+    setLoading(false);
+  };
+  validateToken();
   }, []);
+
 
   const login = (userData, jwtToken, userRole) => {
     setUser(userData);
     setToken(jwtToken);
-    setRole(userRole);
+    setRole(userRole.toUpperCase());
 
     localStorage.setItem("token", jwtToken);
     localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("role", userRole);
+    localStorage.setItem("role", userRole.toUpperCase());
   };
 
   const logout = () => {
@@ -42,13 +62,13 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setRole(null);
 
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     localStorage.removeItem("role");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, role, login, logout }}>
+    <AuthContext.Provider value={{ user, token, role, login, logout, loading, updateAuth }}>
       {children}
     </AuthContext.Provider>
   );

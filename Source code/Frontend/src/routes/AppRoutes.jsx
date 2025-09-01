@@ -22,13 +22,12 @@ const AppRoutes = () => {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/review-jobs" element={<ProtectedRoute><ReviewJobs /></ProtectedRoute>} />
         <Route path="/signed-jobs" element={<ProtectedRoute><SignedJobs /></ProtectedRoute>} />
-        <Route path="/notifications" element={<ProtectedRoute><NotificationsWorker/></ProtectedRoute>} />
+        <Route path="/notifications-worker" element={<ProtectedRoute><NotificationsWorker/></ProtectedRoute>} />
         <Route path="/be-employer" element={<ProtectedRoute><BeEmployer /></ProtectedRoute>} />
-
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
         <Route path="/posted-jobs" element={<ProtectedRoute><PostedJobs /></ProtectedRoute>} />
-        <Route path="/notifications" element={<ProtectedRoute><NotificationsEmployer/></ProtectedRoute>} />
+        <Route path="/notifications-employer" element={<ProtectedRoute><NotificationsEmployer/></ProtectedRoute>} />
         <Route path="/create-job" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+        <Route path="/be-worker" element={<ProtectedRoute><BeWorker/></ProtectedRoute>} />
       </Routes>
   
   );

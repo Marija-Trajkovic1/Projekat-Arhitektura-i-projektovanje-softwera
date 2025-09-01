@@ -22,6 +22,22 @@ namespace TaskIT.Mapping
                 UserAppliedAdv=userModel.UserAppliedAdv.Select(x => x.ToJobAdvertisementDTO()).ToList()
             };
         }
+        public static UserProfileResponse ToUserProfileDTO(this User userModel)
+        {
+            if (userModel == null) return null;
+            return new UserProfileResponse
+            {
+                Id = userModel.Id,
+                Name = userModel.Name,
+                Surname = userModel.Surname,
+                Email = userModel.Email,
+                PhoneNumber = userModel.PhoneNumber,
+                UserName = userModel.UserName,
+                City = userModel.City,
+                Street = userModel.Street,
+                HomeNumber = userModel.HomeNumber
+            };
+        }
 
         public static User ToUserFromCreateUserRequest(this CreateUserRequest createUser)
         {
@@ -39,12 +55,11 @@ namespace TaskIT.Mapping
             };
         }
 
-        public static User ToUserFromUpdateUserRequest(this UpdateUserRequest updateUser, string id)
+        public static User ToUserFromUpdateUserRequest(this UpdateUserRequest updateUser)
         {
             if (updateUser == null) return null;
             return new User
             {
-                Email = updateUser.Email,
                 PhoneNumber = updateUser.PhoneNumber,
                 City = updateUser.City,
                 Street = updateUser.Street,

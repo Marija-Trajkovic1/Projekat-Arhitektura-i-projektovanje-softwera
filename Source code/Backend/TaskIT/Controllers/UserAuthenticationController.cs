@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskIT.DTOs.AuthenticateUserDTOs;
 using TaskIT.Mapping;
-using TaskIT.Repository.UserRepositoryF;
 using TaskIT.Services;
 
 namespace TaskIT.Controllers
@@ -49,16 +48,50 @@ namespace TaskIT.Controllers
             if(!result.Succeeded) return Unauthorized("Invalid email or password");
 
             var token = await tokenService.CreateTokenAsync(user);
-
-            return Ok(new { Token = token});
+            var role= (await userManager.GetRolesAsync(user)).FirstOrDefault();
+            var userResponse = user.ToUserDTO();
+            return Ok(new { Token = token, UserResponse=userResponse, Role=role});
         }
 
         [Authorize]
-        [HttpGet("profile")]
-        public IActionResult GetProfile()
+        [HttpPost("ChangeRole")]
+        public async Task<IActionResult> ChangeRole(string currentRole)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return Ok(userId);
+            var userId = GetUserId();
+            var user= await userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound("User not found");
+
+            var currentRoles = await userManager.GetRolesAsync(user);
+
+            if (!currentRoles.Contains(currentRole))
+            {
+                return BadRequest($"User does not have role: {currentRole}");
+            }
+
+            if (currentRoles.Contains(currentRole))
+            {
+                var removeResult = await userManager.RemoveFromRoleAsync(user, currentRole);
+                if (!removeResult.Succeeded)
+                {
+                    return BadRequest($"Failed to remove role {currentRole}: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}");
+                }
+
+                string newRole = currentRole == "WORKER" ? "EMPLOYER" : "WORKER";
+                var addResult = await userManager.AddToRoleAsync(user, newRole);
+                if (!addResult.Succeeded)
+                {
+                    return BadRequest($"Failed to add role {newRole}: {string.Join(", ", addResult.Errors.Select(e => e.Description))}");
+                }
+            }
+
+            var token = await tokenService.CreateTokenAsync(user);
+            var role = (await userManager.GetRolesAsync(user)).FirstOrDefault();
+            var userChanged = await userManager.FindByIdAsync(userId);
+            var userResponse = userChanged.ToUserDTO();
+            return Ok(new { Token = token, UserResponse = userResponse, Role = role });
         }
+
+        private string GetUserId() =>
+           User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

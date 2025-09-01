@@ -22,25 +22,14 @@ namespace TaskIT.Controllers
         }
 
         [Authorize]
-        [HttpGet("FindAllUsers")]
-        public async Task<IActionResult> FindAllUsers()
-        {
-            var users = await userRepository.GetAllAsync();
-            var usersDTO = users.Select(s => s.ToUserDTO());
-            if (usersDTO == null || !usersDTO.Any()) 
-                return NotFound("No users found.");
-            return Ok(usersDTO);
-        }
-
-        [Authorize]
-        [HttpGet("FindUser")]
-        public async Task<IActionResult> FindUser()
+        [HttpGet("FindUserForProfile")]
+        public async Task<IActionResult> FindUserForProfile()
         {
             var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await userRepository.GetAsync(userId);
             if (user == null) 
                 return NotFound($"User with not found.");
-            var userResponse = user.ToUserDTO();
+            var userResponse = user.ToUserProfileDTO();
             return Ok(userResponse);
         }
 
@@ -49,8 +38,8 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> UpdateUserInformation([FromBody] UpdateUserRequest updateUser)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userForUpdate = updateUser.ToUserFromUpdateUserRequest(userId);
-            var user = await userRepository.UpdateAsync(userId, userForUpdate);
+            var userForUpdate = updateUser.ToUserFromUpdateUserRequest();
+            var user = await userRepository.UpdateUserAsync(userId, userForUpdate);
             return Ok(user.ToUserDTO());
         }
 
