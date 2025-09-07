@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskIT.Communication.WorkerJobTypeFollowingServices;
 using TaskIT.DTOs.WorkerJobTypeDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
@@ -12,12 +11,10 @@ namespace TaskIT.Controllers
     public class WorkerJobTypeFollowingController:Controller
     {
         private readonly WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository;
-        private readonly WorkerJobTypeFollowingService workerJobTypeFollowingService;
 
-        public WorkerJobTypeFollowingController(WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository, WorkerJobTypeFollowingService workerJobTypeFollowingService)
+        public WorkerJobTypeFollowingController(WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository)
         {
             this.workerJobTypeFollowingRepository = workerJobTypeFollowingRepository;
-            this.workerJobTypeFollowingService = workerJobTypeFollowingService;
         }
 
         [Authorize(Roles ="Worker")]

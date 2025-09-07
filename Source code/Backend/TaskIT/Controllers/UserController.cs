@@ -38,8 +38,7 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> UpdateUserInformation([FromBody] UpdateUserRequest updateUser)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userForUpdate = updateUser.ToUserFromUpdateUserRequest();
-            var user = await userRepository.UpdateUserAsync(userId, userForUpdate);
+            var user = await userRepository.UpdateUserAsync(userId, updateUser);
             return Ok(user.ToUserDTO());
         }
 

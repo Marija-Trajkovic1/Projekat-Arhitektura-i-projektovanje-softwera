@@ -2,6 +2,6 @@
 {
     public interface JobFilterStrategy
     {
-        IQueryable<JobAdvertisement> Filter(IQueryable<JobAdvertisement> jobAds, object filterValue);
+        IQueryable<JobAdvertisement> Filter(IQueryable<JobAdvertisement> jobAdvertisements, object filterValue);
     }
 }

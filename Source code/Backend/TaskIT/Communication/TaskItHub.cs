@@ -23,5 +23,36 @@ namespace TaskIT.Hubs
             }
             await base.OnDisconnectedAsync(exception);
         }
+
+        public async Task SubscribeToEmployer(string employerId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"employer_{employerId}_followers");
+        }
+
+        public async Task UnsubscribeFromEmployer(string employerId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"employer_{employerId}_followers");
+        }
+
+        public async Task SubscribeToJobType(string jobType)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"jobtype_{jobType}_followers");
+        }
+
+        public async Task UnsubscribeFromJobType(string jobType)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"jobtype_{jobType}_followers");
+        }
+
+        public async Task SubscribeToJob(string jobId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"job_{jobId}_followers");
+        }
+
+        public async Task UnsubscribeFromJob(string jobId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"job_{jobId}_followers");
+        }
+
     }
 }

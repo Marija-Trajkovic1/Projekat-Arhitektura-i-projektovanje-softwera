@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Data.Entity;
-using System.Linq;
-using System.Linq.Expressions;
-using TaskIT.Model;
+﻿using TaskIT.DTOs.UserDTOs;
 
 namespace TaskIT.Repository.UserRepositoryF
 {
@@ -14,7 +9,7 @@ namespace TaskIT.Repository.UserRepositoryF
        {
        }
 
-        public async Task<User> UpdateUserAsync(string userId, User userForUpdate)
+        public async Task<User> UpdateUserAsync(string userId, UpdateUserRequest userForUpdate)
         {
             var user = await context.Users.FindAsync(userId);
             if (user == null)

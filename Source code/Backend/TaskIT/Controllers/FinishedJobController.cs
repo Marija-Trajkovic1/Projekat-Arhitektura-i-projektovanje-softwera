@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TaskIT.Communication.FinishedJobNotificationServices;
+using TaskIT.Communication.NotificationServices;
 using TaskIT.DTOs.FinishedJobDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
-using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.UnityOfWork;
-using TaskIT.Repository.UserFollowingRepositoryF;
-using TaskIT.Repository.UserRepositoryF;
 
 namespace TaskIT.Controllers
 {
@@ -17,7 +14,6 @@ namespace TaskIT.Controllers
         private readonly UnitOfWork unitOfWork;
         private readonly FinishedJobRepository finishedJobRepository;
         private readonly FinishedJobNotificationService finishedJobNotificationService;
-   
         public FinishedJobController(FinishedJobRepository finishedJobRepository, UnitOfWork unitOfWork, FinishedJobNotificationService finishedJobNotificationService)
         {
             this.finishedJobRepository = finishedJobRepository;
@@ -54,7 +50,7 @@ namespace TaskIT.Controllers
 
         [Authorize(Roles = "Employer")]
         [HttpPut("AcceptApplicationForJob/{jobAdvertisementId}")]
-        public async Task<IActionResult> DeclineaApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        public async Task<IActionResult> AcceptApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
         {
             var jobAdvertisement = await unitOfWork.JobAdvertisements.GetAsync(jobAdvertisementId);
             if (jobAdvertisement == null)
@@ -76,12 +72,9 @@ namespace TaskIT.Controllers
             };
 
             await unitOfWork.FinishedJobs.CreateAsync(acceptedJob);
-
-            var jobAdvertisementTitle = jobAdvertisement.Title;
             var employer = await unitOfWork.Users.GetAsync(employerId);
-            var employerUserName = employer.UserName;
 
-            await finishedJobNotificationService.NotifyAccepted(workerId, jobAdvertisementId, jobAdvertisementTitle, employerUserName);
+            await finishedJobNotificationService.NotifyAccepted(workerId, jobAdvertisementId, jobAdvertisement.Title, employer.Name);
             
             await unitOfWork.CompleteAsync();
             return Ok("Your application was accepted!");
@@ -101,22 +94,17 @@ namespace TaskIT.Controllers
 
             var jobAdvertisementId = finishedJob.JobAdvertisementId;
             var employerId = finishedJob.EmployerId;
-            var jobTitle = finishedJob.JobAdvertisement.Title;
-
             var jobAdvertisement = await unitOfWork.JobAdvertisements.GetAsync(jobAdvertisementId);
+
             jobAdvertisement.MyWorkerId = null;
             jobAdvertisement.IsAvailable = true;
 
-            var worker = await unitOfWork.Users.GetAsync(workerId);
-            var workerUserName= worker.UserName;
-            var jobAdvertisementTitle = jobAdvertisement.Title;
-            var followerIds =await unitOfWork.UserFollowings.GetFollowersIds(employerId);
-
             await unitOfWork.JobAdvertisements.UpdateAsync(jobAdvertisementId, jobAdvertisement);
             await unitOfWork.FinishedJobs.DeleteAsync(finishedJobId);
+            var worker = await unitOfWork.Users.GetAsync(workerId);
 
-            await finishedJobNotificationService.NotifyWorkerDeclineApplicationAfterAcception(employerId, jobAdvertisementId, workerUserName);
-            await finishedJobNotificationService.NotifyAvailableAgain(followerIds, jobAdvertisementId, jobAdvertisementTitle);
+            await finishedJobNotificationService.NotifyWorkerDeclineApplicationAfterAcception(employerId, jobAdvertisementId, worker.Name);
+            await finishedJobNotificationService.NotifyAvailableAgain(jobAdvertisementId, jobAdvertisement.Title, employerId, jobAdvertisement.JobType);
             await unitOfWork.CompleteAsync();
             return Ok("You have declined your application for this job.");
         }
@@ -126,9 +114,8 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> WorkerEvaluation([FromBody] int workerEvaluation, [FromRoute] string finishedJobId)
         {
             var finishedJob = await finishedJobRepository.WorkerEvaluateAsync(finishedJobId, workerEvaluation);
-            var workerId = finishedJob.WorkerId;
-            var finishedJobTitle = finishedJob.JobAdvertisement.Title;
-            await finishedJobNotificationService.NotifyWorkerEvaluated(workerId, finishedJobTitle, workerEvaluation);
+           
+            await finishedJobNotificationService.NotifyWorkerEvaluated(finishedJob.WorkerId, finishedJob.JobAdvertisement.Title, workerEvaluation);
 
             return Ok(finishedJob.ToFinishedJobDTO());
         }
@@ -158,9 +145,8 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> EmployerEvaluation([FromBody] int employerEvaluation, [FromRoute] string finishedJobId)
         {
             var finishedJob = await finishedJobRepository.EmployerEvaluateAsync(finishedJobId, employerEvaluation);
-            var employerId = finishedJob.EmployerId;
-            var finishedJobTitle = finishedJob.JobAdvertisement.Title;
-            await finishedJobNotificationService.NotifyEmployerEvaluated(employerId, finishedJobTitle, employerEvaluation);
+ 
+            await finishedJobNotificationService.NotifyEmployerEvaluated(finishedJob.EmployerId, finishedJob.JobAdvertisement.Title, employerEvaluation);
 
             return Ok(finishedJob.ToFinishedJobDTO());
         }

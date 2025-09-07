@@ -11,7 +11,7 @@ function Login() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const { login} = useAuth();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +30,7 @@ function Login() {
 
       console.log("API response Login:", response.data);
       const { token, userResponse, role } = response.data;
-      console.log("Podaci za login",{token, userResponse, role});
+      console.log("Podaci za login:", {token, userResponse, role});
       
       const normalizedRole = role.toUpperCase();
       login(userResponse, token, normalizedRole);

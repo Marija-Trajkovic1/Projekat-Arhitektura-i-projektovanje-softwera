@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TaskIT.Communication.JobAdvertisementNotificationServices;
+using TaskIT.Communication.NotificationServices;
 using TaskIT.DTOs.JobAdvertisementDTOs;
 using TaskIT.Filters;
-using TaskIT.Filters.ConcreteStrategies;
 using TaskIT.Mapping;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
+
 
 namespace TaskIT.Controllers
 {
@@ -19,16 +19,26 @@ namespace TaskIT.Controllers
     {
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
         private readonly JobAdvertisementNotificationService jobAdvertisementNotificationService;
+        private readonly JobApplicationNotificationService jobApplicationNotificationService;
         private readonly UserRepository userRepository;
         private readonly UserFollowingRepository userFollowingRepository;
         private readonly WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository;
-        public JobAdvertisementController(JobAdvertisementRepository jobAdvertisementRepository, UserRepository userRepository, UserFollowingRepository userFollowingRepository, WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository, JobAdvertisementNotificationService jobAdvertisementNotificationService)
+        private readonly JobFilterStrategyFactory jobFilterStrategyFactory;
+        public JobAdvertisementController(JobAdvertisementRepository jobAdvertisementRepository, 
+            UserRepository userRepository, 
+            UserFollowingRepository userFollowingRepository, 
+            WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository, 
+            JobAdvertisementNotificationService jobAdvertisementNotificationService, 
+            JobApplicationNotificationService jobApplicationNotificationService,
+            JobFilterStrategyFactory jobFilterStrategyFactory)
         {
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.jobAdvertisementNotificationService = jobAdvertisementNotificationService;
+            this.jobApplicationNotificationService = jobApplicationNotificationService;
             this.userRepository = userRepository;
             this.userFollowingRepository = userFollowingRepository;
             this.workerJobTypeFollowingRepository = workerJobTypeFollowingRepository;
+            this.jobFilterStrategyFactory = jobFilterStrategyFactory;   
         }
 
         [Authorize]
@@ -73,16 +83,7 @@ namespace TaskIT.Controllers
                 
                var createdJobAdvertisement = await jobAdvertisementRepository.CreateAsync(jobAdvertisement);
 
-                var jobAdvertisementId = createdJobAdvertisement.Id;
-                var employer = await userRepository.GetAsync(employerId);
-                var employerUserName = employer.UserName;
-
-                var employerFollowersIds = await userFollowingRepository.GetFollowersIds(employerId);
-                await jobAdvertisementNotificationService.NotifyNewJobAdvertisement(employerFollowersIds, jobAdvertisementId, employerUserName);
-
-                var jobType = jobAdvertisement.JobType;
-                var jobFollowersIds = await workerJobTypeFollowingRepository.GetWorkersByJobTypeAsync(jobType);
-                await jobAdvertisementNotificationService.NotifyNewJobAdvertisementByType(jobFollowersIds, jobAdvertisementId, jobType);
+                await jobAdvertisementNotificationService.NotifyNewJobAdvertisement(createdJobAdvertisement.Id, createdJobAdvertisement.Title, createdJobAdvertisement.MyEmployerId, createdJobAdvertisement.JobType);
 
                 return CreatedAtAction(nameof(FindJobAdvertisementById), new { id = jobAdvertisement.Id }, jobAdvertisement.ToJobAdvertisementDTO());
 
@@ -98,10 +99,8 @@ namespace TaskIT.Controllers
             {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromUpdateJobAdvertisementRequest(jobAdvertisementId);
                 var jobAdvertisementUpdated = await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
-                var employerId = jobAdvertisementUpdated.MyEmployerId;
-                var jobAdvertisementTitle = jobAdvertisementUpdated.Title;
-                var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
-                await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdate(followersIds, jobAdvertisementTitle);
+               
+                await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdated(jobAdvertisement.Id, jobAdvertisement.Title, jobAdvertisement.MyWorkerId, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
                 return Ok(jobAdvertisement.ToJobAdvertisementDTO());
             }
             return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
@@ -124,12 +123,9 @@ namespace TaskIT.Controllers
             jobAdvertisement.IsAvailable = false;
             await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
 
-            var employerId = jobAdvertisement.MyEmployerId; 
-            var jobAdvertisementTitle = jobAdvertisement.Title;
             var worker = await userRepository.GetAsync(workerId);
-            var workerUserName = worker.UserName;
 
-            await jobAdvertisementNotificationService.NotifyApplied(employerId, jobAdvertisementId, jobAdvertisementTitle, workerUserName);
+            await jobApplicationNotificationService.NotifyApplicationSubmitted(jobAdvertisement.MyEmployerId, workerId,jobAdvertisementId, jobAdvertisement.Title);
             return Ok("You have successfully applied for the job.");
         }
 
@@ -151,14 +147,8 @@ namespace TaskIT.Controllers
             jobAdvertisement.IsAvailable = true;
             await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
 
-            var jobAdvertisementTitle = jobAdvertisement.Title;
-            var employerId = jobAdvertisement.MyEmployerId;
-            var employer = await userRepository.GetAsync(employerId);
-            var employerUserName = employer.UserName;
-            var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
-
-            await jobAdvertisementNotificationService.NotifyDeclined(workerId, jobAdvertisementId, jobAdvertisementTitle, employerUserName);
-            await jobAdvertisementNotificationService.NotifyAvailableAgain(followersIds, jobAdvertisementId, jobAdvertisementTitle);
+            await jobAdvertisementNotificationService.NotifyJobApplicationRejected(workerId, jobAdvertisementId, jobAdvertisement.Title);
+            await jobAdvertisementNotificationService.NotifyAvailableAgain(jobAdvertisementId, jobAdvertisement.Title, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
             return Ok("Your application was declined!");
         }
 
@@ -181,15 +171,11 @@ namespace TaskIT.Controllers
                 jobAdvertisement.IsAvailable = true;
                 await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
 
-                var jobAdvertisementTitle = jobAdvertisement.Title;
-                var employerId = jobAdvertisement.MyEmployerId;
                 var worker = await userRepository.GetAsync(workerId);
-                var workerUserName = worker.UserName;
-                var followersIds = await userFollowingRepository.GetFollowersIds(employerId);
 
-                await jobAdvertisementNotificationService.NotifyDeclinedByWorker(employerId, jobAdvertisementId, jobAdvertisementTitle, workerUserName);
-                await jobAdvertisementNotificationService.NotifyAvailableAgain(followersIds, jobAdvertisementId, jobAdvertisementTitle);
-                return Ok("Your application was declined!");
+                await jobApplicationNotificationService.NotifyApplicationDeclined(jobAdvertisement.MyEmployerId, workerId, jobAdvertisementId);
+                await jobAdvertisementNotificationService.NotifyAvailableAgain(jobAdvertisement.Id, jobAdvertisement.Title, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
+            return Ok("Your application was declined!");
         }
 
         [Authorize(Roles ="Employer")]
@@ -204,8 +190,8 @@ namespace TaskIT.Controllers
         [Authorize]
         [HttpGet("GetFilteredJobAdvertisements")]
         public async Task<IActionResult> GetFilteredJobAdvertisements(
+            [FromQuery] string? filterBy,
             [FromQuery] string? employerId,
-            [FromQuery] string? employerName,
             [FromQuery] int? minSalary,
             [FromQuery] int? maxSalary,
             [FromQuery] string? jobType,
@@ -213,31 +199,21 @@ namespace TaskIT.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var filterContext = new JobFilterContext();
-            var allJobs = jobAdvertisementRepository.GetAllQueryable();
-            if (!string.IsNullOrEmpty(employerId))
+            try
             {
-                filterContext.AddFilter(new EmployerFilterStrategyImpl(), employerId);
+                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId, minSalary, maxSalary, jobType, city);
+                var allJobAdvertisements = jobAdvertisementRepository.GetAllQueryable();
+                var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)
+                        .Skip((page - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
+                var filteredJobAdvertisementsDTO = filteredJobAdvertisements.Select(j => j.ToJobAdvertisementDTO());
+                return Ok(filteredJobAdvertisementsDTO);
             }
-            if (minSalary.HasValue && maxSalary.HasValue)
+            catch (ArgumentException ex)
             {
-                filterContext.AddFilter(new SalaryFilterStrategyImpl(), new Tuple<int,int>( minSalary.Value, maxSalary.Value ));
+                return BadRequest(ex.Message);
             }
-            if (!string.IsNullOrEmpty(jobType))
-            {
-                filterContext.AddFilter(new JobTypeFilterStrategyImpl(), jobType);
-            }
-            if (!string.IsNullOrEmpty(city))
-            {
-                filterContext.AddFilter(new CityFilterStrategyImpl(), city);
-            }
-            var filteredJobs = await filterContext.ApplyFilters(allJobs)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var filteredJobsDTO = filteredJobs.Select(j => j.ToJobAdvertisementDTO());
-            return Ok(filteredJobsDTO);
         }
 
         private string GetUserId() =>

@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using TaskIT.Communication;
+using TaskIT.Communication.NotificationServices;
+using TaskIT.Filters;
 using TaskIT.Hubs;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
@@ -13,13 +16,16 @@ using TaskIT.Repository.UserRepositoryF;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
 using TaskIT.Services;
 
-
-
 //global using Microsoft.EntityFrameworkCore.SqlServer;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<JobAdvertisementNotificationService, JobAdvertisementNotificationServiceImpl>();
+builder.Services.AddSingleton<JobApplicationNotificationService, JobApplicationNotificationServiceImpl>();
+builder.Services.AddSingleton<FollowingNotificationService, FollowingNotificationServiceImpl>();
+builder.Services.AddSingleton<FinishedJobNotificationService, FinishedJobNotificationServiceImpl>();
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<TaskITContext>(options =>
@@ -102,6 +108,7 @@ builder.Services.AddScoped<JobAdvertisementRepository, JobAdvertisementRepositor
 builder.Services.AddScoped<UserFollowingRepository, UserFollowingRepositoryImpl>();
 builder.Services.AddScoped<WorkerJobTypeFollowingRepository, WorkerJobTypeFollowingRepositoryImpl>();
 
+builder.Services.AddSingleton<JobFilterStrategyFactory>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

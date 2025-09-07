@@ -3,11 +3,11 @@ namespace TaskIT.Filters.ConcreteStrategies
 {
     public class CityFilterStrategyImpl : JobFilterStrategy
     {
-        public IQueryable<JobAdvertisement> Filter(IQueryable<JobAdvertisement> jobAds, object filterValue)
+        public IQueryable<JobAdvertisement> Filter(IQueryable<JobAdvertisement> jobAdvertisements, object filterValue)
         {
             var city = filterValue as string;
-            if (string.IsNullOrEmpty(city)) return jobAds;
-            return jobAds.Where(job => job.City.ToLower()== city.ToLower());
+            if (string.IsNullOrEmpty(city)) return jobAdvertisements;
+            return jobAdvertisements.Where(job => job.City.ToLower()== city.ToLower());
 
 
         }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TaskIT.Communication.UserFollowingNotificationServices;
+using TaskIT.Communication.NotificationServices;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
 
@@ -12,12 +12,12 @@ namespace TaskIT.Controllers
     public class UserFollowingController : Controller
     {
         private readonly UserFollowingRepository userFollowingRepository;
-        private readonly UserFollowingNotificationService userFollowingNotificationService;
+        private readonly FollowingNotificationService followingNotificationService;
         private readonly UserRepository userRepository;
         
-        public UserFollowingController(UserFollowingNotificationService userFollowingNotificationService, UserRepository userRepository, UserFollowingRepository userFollowingRepository)
+        public UserFollowingController(FollowingNotificationService followingNotificationService, UserRepository userRepository, UserFollowingRepository userFollowingRepository)
         {
-            this.userFollowingNotificationService = userFollowingNotificationService;
+            this.followingNotificationService = followingNotificationService;
             this.userFollowingRepository = userFollowingRepository;
             this.userRepository = userRepository;
         }
@@ -33,17 +33,17 @@ namespace TaskIT.Controllers
             if (!followerUser || !followedUser)
                 return NotFound("Users dont't exist!");
 
-            var following = await userFollowingRepository.GetFollowing(followerUserId, followedUserId);
+            var existingFollowing = await userFollowingRepository.GetFollowing(followerUserId, followedUserId);
 
-            if (following == null)
+            if (existingFollowing == null)
             {
                 var newFollowing = new UserFollowing { FollowedId = followedUserId, FollowerId = followerUserId };
-                var newFollowingAction = await userFollowingRepository.CreateAsync(newFollowing);
+                await userFollowingRepository.CreateAsync(newFollowing);
 
-                var follower = userRepository.GetAsync(followerUserId);
-                var followerName = follower.Result.UserName;
+                var follower = await userRepository.GetAsync(followerUserId);
+                var followerName = follower.Name;
 
-                await userFollowingNotificationService.NotifyFollow(followedUserId, followerName);
+                await followingNotificationService.NotifyEmployerFollowed(followedUserId, followerName);
                 return Ok("User succesfuly followed!");
             }
             return BadRequest("This following relation already exists!");
@@ -60,17 +60,17 @@ namespace TaskIT.Controllers
             if (!followerUser || !followedUser)
                 return NotFound("Users dont't exist!");
 
-            var unfollowing = await userFollowingRepository.GetFollowing(followerUserId, followedUserId);
+            var following = await userFollowingRepository.GetFollowing(followerUserId, followedUserId);
 
-            if (unfollowing == null)
+            if (following == null)
                 return NotFound("This following relation does not exist!");
 
-            await userFollowingRepository.DeleteAsync(unfollowing.Id);
+            await userFollowingRepository.DeleteAsync(following.Id);
 
-            var follower = userRepository.GetAsync(followerUserId);
-            var followerName = follower.Result.UserName;
+            var follower = await userRepository.GetAsync(followerUserId);
+            var followerName = follower.Name;
 
-            await userFollowingNotificationService.NotifyUnfollow(followedUserId, followerName);
+            await followingNotificationService.NotifyEmployerUnfollowed(followedUserId, followerName);
             return Ok("User succesfuly unfollowed!");
         }
         private string GetUserId() =>

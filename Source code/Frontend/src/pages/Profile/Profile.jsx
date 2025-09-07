@@ -4,7 +4,7 @@ import axios from "axios";
 import { HttpTransportType } from "@microsoft/signalr";
 
 const Profile = () => {
-  const { user, token,role, logout, updateAuth} = useAuth();
+  const { user, token, role, logout, updateAuth } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState(null);
@@ -74,31 +74,34 @@ const Profile = () => {
   };
 
   const handleBeEmployer = async () => {
-    try{
+    try {
       const response = await axios.post(
         `https://localhost:7260/UserAuthentication/ChangeRole`,
-        {CurrentRole:"Worker"},
+        { CurrentRole: "Worker" },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       updateAuth({
-        token:response.data.Token, 
-        user:response.data.UserResponse, 
-        role:response.data.Role});
-        
+        token: response.data.Token,
+        user: response.data.UserResponse,
+        role: response.data.Role,
+      });
+
       console.log("Successfully became an employer:", response.data);
       alert("You are now an employer!");
       navigate("/profile");
-
-    }catch(error){
-      console.error('Greška pri promeni role:', error.response?.data || error.message);
+    } catch (error) {
+      console.error(
+        "Greška pri promeni role:",
+        error.response?.data || error.message
+      );
       if (error.response?.status === 401) {
         logout();
       }
-      alert('Neuspešna promena role. Pokušajte ponovo.');
+      alert("Neuspešna promena role. Pokušajte ponovo.");
     }
-  }
+  };
   if (loading) return <p>Loading profile...</p>;
   if (!profileData) return <p>Profile not found!</p>;
 
@@ -158,7 +161,8 @@ const Profile = () => {
   const displayModeShow = (
     <>
       <p>
-      <strong>Trenutno ste ulogovani kao:</strong>{role}
+        <strong>Trenutno ste ulogovani kao:</strong>
+        {role}
       </p>
       <p>
         <strong>Name:</strong> {profileData.name}
@@ -199,7 +203,10 @@ const Profile = () => {
         Edit Profile
       </button>
 
-      <button onClick={handleBeEmployer}className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600">
+      <button
+        onClick={handleBeEmployer}
+        className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600"
+      >
         Become an employer
       </button>
 
@@ -209,7 +216,6 @@ const Profile = () => {
       >
         Logout
       </button>
-
     </>
   );
 
