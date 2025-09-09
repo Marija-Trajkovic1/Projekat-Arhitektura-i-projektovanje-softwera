@@ -8,6 +8,7 @@ import ReviewJobs from "../pages/WorkerPages/ReviewJobs";
 import SignedJobs from "../pages/WorkerPages/SignedJobs";
 import NotificationsWorker from "../pages/Notifications/NotificationsWorker";
 import BeEmployer from "../pages/WorkerPages/BeEmployer";
+import BeWorker from "../pages/EmployerPages/BeWorker";
 import PostedJobs from "../pages/EmployerPages/PostedJobs";
 import NotificationsEmployer from "../pages/Notifications/NotificationsEmployer";
 import CreateJob from "../pages/EmployerPages/CreateJob";

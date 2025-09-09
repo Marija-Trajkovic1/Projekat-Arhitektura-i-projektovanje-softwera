@@ -1,7 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import NavBar from "./NavBar";
 import Landing from "./Landing";
-import AuthProvider from "../../context/AuthContext";
 const Home = () => {
   const navigate = useNavigate();
 

@@ -1,18 +1,24 @@
 import { useAuth } from "../../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { HttpTransportType } from "@microsoft/signalr";
 
 const Profile = () => {
   const { user, token, role, logout, updateAuth } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState({
+    phoneNumber: "",
+    street: "",
+    city: "",
+    homeNumber: "",
+  });
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || profileData) return;
 
     const fetchProfileData = async () => {
       try {
@@ -24,10 +30,10 @@ const Profile = () => {
         );
         setProfileData(response.data);
         setFormData({
-          phoneNumber: response.data.phoneNumber,
-          street: response.data.street,
-          city: response.data.city,
-          homeNumber: response.data.homeNumber,
+          phoneNumber: response.data.phoneNumber || "",
+          street: response.data.street || "",
+          city: response.data.city || "",
+          homeNumber: response.data.homeNumber|| "",
         });
       } catch (error) {
         console.error(
@@ -42,7 +48,7 @@ const Profile = () => {
       }
     };
     fetchProfileData();
-  }, [user, token, logout]);
+  }, [user, token, logout, profileData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,6 +56,7 @@ const Profile = () => {
   };
 
   const handleUpdate = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.put(
         `https://localhost:7260/User/UpdateUserInformation`,
@@ -67,41 +74,58 @@ const Profile = () => {
         error.response?.data || error.message
       );
       if (error.response?.status === 401) {
-        logout(); // Automatski logout ako 401
+        logout();
       }
       alert("Failed to update profile. Please try again.");
+    }finally{
+      setIsLoading(false);
     }
   };
 
-  const handleBeEmployer = async () => {
+  const handleRoleChange = useCallback(async () => {
+    setIsLoading(true);
     try {
+      console.log("Starting role change for current role:", role);
+      const currentRole = role;
       const response = await axios.post(
-        `https://localhost:7260/UserAuthentication/ChangeRole`,
-        { CurrentRole: "Worker" },
+        `https://localhost:7260/UserAuthentication/ChangeRole?currentRole=${currentRole}`,
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log("Role change response:", response.data);
       updateAuth({
-        token: response.data.Token,
-        user: response.data.UserResponse,
-        role: response.data.Role,
+        token: response.data.token,
+        user: response.data.userResponse,
+        role: response.data.role,
       });
 
-      console.log("Successfully became an employer:", response.data);
-      alert("You are now an employer!");
-      navigate("/profile");
+      setProfileData(response.data.userResponse);
+      setFormData({
+        phoneNumber: response.data.userResponse.phoneNumber || "",
+        street:  response.data.userResponse.street || "",
+        city:  response.data.userResponse.city|| "",
+        homeNumber:  response.data.userResponse.homeNumber || "",
+      });
+      alert("YOu are now a ${Role.toLowerCase()}!");
+
+      navigate(0);
     } catch (error) {
       console.error(
         "Greška pri promeni role:",
         error.response?.data || error.message
       );
       if (error.response?.status === 401) {
+        console.log("401 Unauthorized detected, logging out");
         logout();
       }
       alert("Neuspešna promena role. Pokušajte ponovo.");
+    }finally{
+      setIsLoading(false);
     }
-  };
+  }, [role, token, updateAuth, navigate, logout, isLoading]);
+
   if (loading) return <p>Loading profile...</p>;
   if (!profileData) return <p>Profile not found!</p>;
 
@@ -110,7 +134,7 @@ const Profile = () => {
   const editeModeInput = (
     <>
       <input
-        type="text"
+        type="number"
         name="phoneNumber"
         value={formData.phoneNumber}
         onChange={handleChange}
@@ -119,19 +143,19 @@ const Profile = () => {
       />
       <input
         type="text"
-        name="street"
-        value={formData.street}
-        onChange={handleChange}
-        className={inputStyle}
-        placeholder="Street"
-      />
-      <input
-        type="text"
         name="city"
         value={formData.city}
         onChange={handleChange}
         className={inputStyle}
         placeholder="City"
+      />
+      <input
+        type="text"
+        name="street"
+        value={formData.street}
+        onChange={handleChange}
+        className={inputStyle}
+        placeholder="Street"
       />
       <input
         type="text"
@@ -145,12 +169,14 @@ const Profile = () => {
         <button
           onClick={handleUpdate}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          disabled={isLoading}
         >
-          Save
+          {isLoading ? "Saving..." : "Save"}
         </button>
         <button
           onClick={() => setEditMode(false)}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover: bg-bray-600"
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-bray-600"
+          disabled={isLoading}
         >
           Cancel
         </button>
@@ -204,10 +230,11 @@ const Profile = () => {
       </button>
 
       <button
-        onClick={handleBeEmployer}
-        className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600"
+        onClick={handleRoleChange}
+        className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600 ml-2"
+        disabled={isLoading}
       >
-        Become an employer
+       {isLoading ? "Processing...":role==="WORKER"? "Become an employer" : "Become a worker"}
       </button>
 
       <button
