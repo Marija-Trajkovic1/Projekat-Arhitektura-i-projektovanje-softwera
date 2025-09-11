@@ -65,7 +65,7 @@ function Login() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Lozinka"
           name="password"
           value={loginCredentials.password}
           onChange={handleChange}
@@ -77,7 +77,7 @@ function Login() {
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
-          Login
+          Prijavite se
         </button>
       </form>
     </div>

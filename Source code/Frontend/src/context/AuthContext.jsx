@@ -8,6 +8,7 @@ export default function AuthProvider ({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [role, setRole] = useState(localStorage.getItem("role") || null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const updateAuth = ({ token, user, role }) => {
     setToken(token);
@@ -20,6 +21,7 @@ export default function AuthProvider ({ children }) {
 
   useEffect(() => {
     const validateToken = async () => {
+      if(isLoggingOut) return;
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
@@ -44,7 +46,7 @@ export default function AuthProvider ({ children }) {
     setLoading(false);
   };
   validateToken();
-  }, []);
+  }, [isLoggingOut]);
 
 
   const login = (userData, jwtToken, userRole) => {
@@ -58,6 +60,7 @@ export default function AuthProvider ({ children }) {
   };
 
   const logout = () => {
+    setIsLoggingOut(true);
     setUser(null);
     setToken(null);
     setRole(null);

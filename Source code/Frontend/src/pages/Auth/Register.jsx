@@ -43,7 +43,7 @@ const Register = () => {
   return(
   <div className="flex items-center justify-center h-screen bg-blue-200">
     <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Kreiraj novi profil</h2>
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-4"
@@ -133,7 +133,7 @@ const Register = () => {
           type="submit"
           className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
-          Register
+          Kreiraj novi profil
         </button>
       </form>
     </div>

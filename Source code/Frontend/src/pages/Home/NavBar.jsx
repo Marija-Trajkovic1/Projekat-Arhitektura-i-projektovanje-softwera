@@ -23,9 +23,9 @@ const NavBar = () => {
 
   return (
     <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
-      <div className="flex justify-between items-center">
         <div className="text-xl font-bold text-blue-600">TaskIT</div>
 
+      <div className="flex items-center">
         <div className="md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -51,14 +51,14 @@ const NavBar = () => {
         <div
           className={`${
             isMenuOpen ? "block" : "hidden"
-          } md:flex md:items-center md:space-x-4`}
+          } md:flex md:items-center md:space-x-4 absolute md:static top-16 left-0 w-full md:w-auto bg-gray-800 md:bg-transparent p-4 md:p-0 z-10 md:z-auto`}
         >
           {showHomeButton && (
             <button
               onClick={() => navigate("/")}
-              className="hover:underline block md:inline-block"
+              className="hover:underline block md:inline-block text-white py-2 md:py-0"
             >
-              Home
+              Početna stranica
             </button>
           )}
 
@@ -66,15 +66,15 @@ const NavBar = () => {
             <>
               <button
                 onClick={() => navigate("/login")}
-                className="hover:underline block md:inline-block"
+                className="hover:underline block md:inline-block text-white py-2 md:py-0"
               >
-                Login
+                Prijavi se
               </button>
               <button
                 onClick={() => navigate("/register")}
-                className="hover:underline block md:inline-block"
+                className="hover:underline block md:inline-block text-white py-2 md:py-0"
               >
-                Register
+                Registruj se
               </button>
             </>
           )}
@@ -83,64 +83,58 @@ const NavBar = () => {
             <>
               <button
                 onClick={() => navigate("/profile")}
-                className="hover:underline block md:inline-block"
+                className="hover:underline block md:inline-block text-white py-2 md:py-0"
               >
-                Profile
+                Profil
               </button>
 
               {role?.toUpperCase() === "WORKER" && (
                 <>
                   <button
                     onClick={() => navigate("/review-jobs")}
-                    className="hover:underline block md:inline-block"
+                    className="hover:underline block md:inline-block text-white py-2 md:py-0"
                   >
-                    Jobs Review
+                    Pregled oglasa 
                   </button>
                   <button
                     onClick={() => navigate("/signed-jobs")}
-                    className="hover:underline block md:inline-block"
+                    className="hover:underline block md:inline-block text-white py-2 md:py-0"
                   >
-                    My Jobs
+                    Prijavljeni poslovi
                   </button>
                   <button
                     onClick={() => navigate("/notifications-worker")}
-                    className="hover:underline block md:inline-block"
+                    className="hover:underline block md:inline-block text-white py-2 md:py-0"
                   >
-                    Notifications
+                    Obaveštenja
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="hover:underline text-red-400 block md:inline-block"
+                    className="hover:underline text-red-400 block md:inline-block text-white py-2 md:py-0"
                   >
-                    Logout
+                    Odjavi se
                   </button>
                 </>
               )}
               {role?.toUpperCase() === "EMPLOYER" && (
                 <>
                   <button
-                    onClick={() => navigate("/posted-jobs")}
-                    className="hover:underline block md:inline-block"
+                    onClick={() => navigate("/manage-job-ads")}
+                    className="hover:underline block md:inline-block text-white py-2 md:py-0"
                   >
-                    Posted Jobs
-                  </button>
-                  <button
-                    onClick={() => navigate("/create-job")}
-                    className="hover:underline block md:inline-block"
-                  >
-                    Create Job
+                    Upravljaj svojim oglasima
                   </button>
                   <button
                     onClick={() => navigate("/notifications-employer")}
-                    className="hover:underline block md:inline-block"
+                    className="hover:underline block md:inline-block text-white py-2 md:py-0"
                   >
-                    Notifications
+                    Obaveštenja
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="hover:underline text-red-400 block md:inline-block"
+                    className="hover:underline text-red-400 block md:inline-block text-white py-2 md:py-0"
                   >
-                    Logout
+                    Odjavi se
                   </button>
                 </>
               )}

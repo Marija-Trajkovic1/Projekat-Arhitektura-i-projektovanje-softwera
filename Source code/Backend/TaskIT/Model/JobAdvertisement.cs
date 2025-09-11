@@ -50,7 +50,7 @@ namespace TaskIT.Model
         public string MyEmployerId { get; set; }
 
         [JsonIgnore]
-        public User MyEmployer { get; set; }= new User();
+        public User MyEmployer { get; set; }
 
         public string? MyWorkerId { get; set; }
 

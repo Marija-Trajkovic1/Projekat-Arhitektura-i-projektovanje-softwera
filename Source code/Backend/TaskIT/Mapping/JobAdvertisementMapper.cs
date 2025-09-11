@@ -37,8 +37,7 @@ namespace TaskIT.Mapping
                 Street = jobAdvertisementDTO.Street,
                 HomeNumber = jobAdvertisementDTO.HomeNumber,
                 DateOfExecution = jobAdvertisementDTO.DateOfExecution,
-                WorkDuration = jobAdvertisementDTO.WorkDuration,
-                IsAvailable = true, 
+                WorkDuration = jobAdvertisementDTO.WorkDuration, 
                 JobSalary = jobAdvertisementDTO.JobSalary,
                 JobType = jobAdvertisementDTO.JobType,
                 MyEmployerId = employerId

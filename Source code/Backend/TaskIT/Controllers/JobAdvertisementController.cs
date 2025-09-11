@@ -51,15 +51,6 @@ namespace TaskIT.Controllers
             return Ok(jobAdvertisement.ToJobAdvertisementDTO());
         }
 
-        [Authorize]
-        [HttpGet("FindAllJobAdvertisementsForEmployer")]
-        public async Task<IActionResult> FindAllJobAdvertisementsForEmployer(string employerId)
-        {
-            var postedJobAdvertisements = await jobAdvertisementRepository.GetAllUserPostedJobsAsync(employerId);
-            var postedJobAdvertisementsDTO = postedJobAdvertisements.Select(j => j.ToJobAdvertisementDTO());
-            return Ok(postedJobAdvertisementsDTO);
-        }
-
         [Authorize(Roles = "Worker")]
         [HttpGet("FindAvailableJobs")]
         public async Task<IActionResult> FindAvailableJobs()
@@ -70,18 +61,22 @@ namespace TaskIT.Controllers
             return Ok(availableJobAdvertisementsDTO);
         }
 
-        [Authorize(Roles = "Employer")]
+        [Authorize(Roles = "EMPLOYER")]
         [HttpPost("AddNewJobAdvertisement")]
         public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO)
         {
             var employerId = GetUserId();
+            Console.WriteLine($"EmployerId iz tokena: {employerId}");
             if (await userRepository.EntityExist(employerId)) 
             {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromCreateJobAdvertisementRequest(employerId);
+                jobAdvertisement.IsAvailable = true;
+                Console.WriteLine($"MyEmployerId pre čuvanja: {jobAdvertisement.MyEmployerId}");
                 if (jobAdvertisement == null)
                     return BadRequest("Invalid job advertisement data.");
                 
                var createdJobAdvertisement = await jobAdvertisementRepository.CreateAsync(jobAdvertisement);
+                Console.WriteLine($"MyEmployerId posle čuvanja: {createdJobAdvertisement.MyEmployerId}");
 
                 await jobAdvertisementNotificationService.NotifyNewJobAdvertisement(createdJobAdvertisement.Id, createdJobAdvertisement.Title, createdJobAdvertisement.MyEmployerId, createdJobAdvertisement.JobType);
 
@@ -190,8 +185,7 @@ namespace TaskIT.Controllers
         [Authorize]
         [HttpGet("GetFilteredJobAdvertisements")]
         public async Task<IActionResult> GetFilteredJobAdvertisements(
-            [FromQuery] string? filterBy,
-            [FromQuery] string? employerId,
+            [FromQuery] string filterBy,
             [FromQuery] int? minSalary,
             [FromQuery] int? maxSalary,
             [FromQuery] string? jobType,
@@ -201,6 +195,7 @@ namespace TaskIT.Controllers
         {
             try
             {
+                var employerId = GetUserId();
                 var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId, minSalary, maxSalary, jobType, city);
                 var allJobAdvertisements = jobAdvertisementRepository.GetAllQueryable();
                 var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)

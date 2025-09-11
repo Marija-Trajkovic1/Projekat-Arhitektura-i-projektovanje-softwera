@@ -67,7 +67,7 @@ const Profile = () => {
       );
       setProfileData(response.data);
       setEditMode(false);
-      alert("Profile updated successfully!");
+      alert("Podaci su uspešno ažurirani!");
     } catch (error) {
       console.error(
         "Error updating profile:",
@@ -76,7 +76,7 @@ const Profile = () => {
       if (error.response?.status === 401) {
         logout();
       }
-      alert("Failed to update profile. Please try again.");
+      alert("Podaci sa profila nisu ažurirani! Molimo Vas pokušajte ponovo!");
     }finally{
       setIsLoading(false);
     }
@@ -108,8 +108,7 @@ const Profile = () => {
         city:  response.data.userResponse.city|| "",
         homeNumber:  response.data.userResponse.homeNumber || "",
       });
-      alert("YOu are now a ${Role.toLowerCase()}!");
-
+      alert("Sada ste ulogovani kao "+response.data.role.toLowerCase()+"!");
       navigate(0);
     } catch (error) {
       console.error(
@@ -120,14 +119,14 @@ const Profile = () => {
         console.log("401 Unauthorized detected, logging out");
         logout();
       }
-      alert("Neuspešna promena role. Pokušajte ponovo.");
+      alert("Neuspešna promena uloge! Molimo Vas pokušajte ponovo!");
     }finally{
       setIsLoading(false);
     }
   }, [role, token, updateAuth, navigate, logout, isLoading]);
 
-  if (loading) return <p>Loading profile...</p>;
-  if (!profileData) return <p>Profile not found!</p>;
+  if (loading) return <p>Profil se ucitava...</p>;
+  if (!profileData) return <p>Profil nije pronadjen!</p>;
 
   const inputStyle = "border p-2 w-full mb-2 rounded";
 
@@ -139,7 +138,7 @@ const Profile = () => {
         value={formData.phoneNumber}
         onChange={handleChange}
         className={inputStyle}
-        placeholder="Phone Number"
+        placeholder="Broj telefona"
       />
       <input
         type="text"
@@ -147,7 +146,7 @@ const Profile = () => {
         value={formData.city}
         onChange={handleChange}
         className={inputStyle}
-        placeholder="City"
+        placeholder="Grad"
       />
       <input
         type="text"
@@ -155,7 +154,7 @@ const Profile = () => {
         value={formData.street}
         onChange={handleChange}
         className={inputStyle}
-        placeholder="Street"
+        placeholder="Ulica"
       />
       <input
         type="text"
@@ -163,7 +162,7 @@ const Profile = () => {
         value={formData.homeNumber}
         onChange={handleChange}
         className={inputStyle}
-        placeholder="Home Number"
+        placeholder="Kućni broj"
       />
       <div className="flex gap-2 mt-2">
         <button
@@ -171,14 +170,14 @@ const Profile = () => {
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           disabled={isLoading}
         >
-          {isLoading ? "Saving..." : "Save"}
+          {isLoading ? "Čuvanje..." : "Sačuvaj"}
         </button>
         <button
           onClick={() => setEditMode(false)}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-bray-600"
           disabled={isLoading}
         >
-          Cancel
+          Otkaži
         </button>
       </div>
     </>
@@ -187,38 +186,39 @@ const Profile = () => {
   const displayModeShow = (
     <>
       <p>
-        <strong>Trenutno ste ulogovani kao:</strong>
+        <strong>Trenutno ste ulogovani kao: </strong>
         {role}
       </p>
       <p>
-        <strong>Name:</strong> {profileData.name}
+        <strong>Ime: </strong>
+        {profileData.name}
       </p>
       <p>
-        <strong>Surname:</strong>
+        <strong>Prezime: </strong> 
         {profileData.surname}
       </p>
       <p>
-        <strong>Email:</strong>
+        <strong>Email: </strong>
         {profileData.email}
       </p>
       <p>
-        <strong>Phone number:</strong>
+        <strong>Broj telefona: </strong>
         {profileData.phoneNumber}
       </p>
       <p>
-        <strong>User name:</strong>
+        <strong>Korisničko ime: </strong>
         {profileData.userName}
       </p>
       <p>
-        <strong>City:</strong>
+        <strong>Grad: </strong>
         {profileData.city}
       </p>
       <p>
-        <strong>Street:</strong>
+        <strong>Ulica: </strong>
         {profileData.street}
       </p>
       <p>
-        <strong>Home number:</strong>
+        <strong>Kućni broj: </strong>
         {profileData.homeNumber}
       </p>
 
@@ -226,7 +226,7 @@ const Profile = () => {
         onClick={() => setEditMode(true)}
         className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
-        Edit Profile
+        Izmenite profil
       </button>
 
       <button
@@ -234,21 +234,21 @@ const Profile = () => {
         className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600 ml-2"
         disabled={isLoading}
       >
-       {isLoading ? "Processing...":role==="WORKER"? "Become an employer" : "Become a worker"}
+       {isLoading ? "Obrada...":role==="WORKER"? "Postni poslodavac" : "Postani radnik"}
       </button>
 
       <button
         onClick={logout}
         className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2"
       >
-        Logout
+        Odjavi se
       </button>
     </>
   );
 
   return (
     <div className="p-6 max-w-3x1 mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Profile</h1>
+      <h1 className="text-3xl font-bold mb-4">Pregledajte ili azurirajte vase podatke</h1>
       <div className="bg-white p-4 rounded shadow mb-4">
         {editMode ? editeModeInput : displayModeShow}
       </div>
