@@ -12,19 +12,19 @@ namespace TaskIT.Model
         public string Id { get; set; }
 
         [Required]
-        [MaxLength(20)]
+        [MaxLength(80)]
         public string Title { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string ShortDescription { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string City { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string Street { get; set; } = string.Empty;
 
         [Required]
@@ -41,7 +41,7 @@ namespace TaskIT.Model
 
         [Required]
         [Range(0, 10000)]
-        public int JobSalary{ get; set; }
+        public int JobSalary { get; set; }
 
         [Required]
         public string JobType { get; set; } = string.Empty;
@@ -52,9 +52,8 @@ namespace TaskIT.Model
         [JsonIgnore]
         public User MyEmployer { get; set; }
 
-        public string? MyWorkerId { get; set; }
-
         [JsonIgnore]
-        public User? MyWorker { get; set; } = null!;
+        public List<JobApplication> JobApplications { get; set; } = new();
+
     }
 }

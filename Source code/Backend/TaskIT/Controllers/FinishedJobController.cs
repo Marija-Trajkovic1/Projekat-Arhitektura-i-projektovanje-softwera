@@ -5,6 +5,7 @@ using TaskIT.Communication.NotificationServices;
 using TaskIT.DTOs.FinishedJobDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
+using TaskIT.Repository.JobApplicationRepositoryF;
 using TaskIT.Repository.UnityOfWork;
 
 namespace TaskIT.Controllers
@@ -13,8 +14,9 @@ namespace TaskIT.Controllers
     {
         private readonly UnitOfWork unitOfWork;
         private readonly FinishedJobRepository finishedJobRepository;
+        private readonly JobApplicationRepository jobApplicationRepository;
         private readonly FinishedJobNotificationService finishedJobNotificationService;
-        public FinishedJobController(FinishedJobRepository finishedJobRepository, UnitOfWork unitOfWork, FinishedJobNotificationService finishedJobNotificationService)
+        public FinishedJobController(FinishedJobRepository finishedJobRepository,JobApplicationRepository jobApplicationRepository,  UnitOfWork unitOfWork, FinishedJobNotificationService finishedJobNotificationService)
         {
             this.finishedJobRepository = finishedJobRepository;
             this.finishedJobNotificationService = finishedJobNotificationService;
@@ -46,67 +48,6 @@ namespace TaskIT.Controllers
 
             await finishedJobRepository.CreateAsync(finishedJob);
             return CreatedAtAction(nameof(FindAllFinishedJobsForWorker), new { workerId = finishedJob.WorkerId }, finishedJob.ToFinishedJobDTO());
-        }
-
-        [Authorize(Roles = "Employer")]
-        [HttpPut("AcceptApplicationForJob/{jobAdvertisementId}")]
-        public async Task<IActionResult> AcceptApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
-        {
-            var jobAdvertisement = await unitOfWork.JobAdvertisements.GetAsync(jobAdvertisementId);
-            if (jobAdvertisement == null)
-                 return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
-          
-            if (jobAdvertisement.MyWorkerId != workerId)
-                 return BadRequest("This job advertisement is assigned to a different worker.");
-            
-            jobAdvertisement.MyWorkerId = workerId;
-            jobAdvertisement.IsAvailable = false;
-            await unitOfWork.JobAdvertisements.UpdateAsync(jobAdvertisementId, jobAdvertisement);
-            var employerId= jobAdvertisement.MyEmployerId;
-
-            var acceptedJob = new FinishedJob
-            {
-                JobAdvertisementId = jobAdvertisementId,
-                WorkerId = workerId,
-                EmployerId = employerId
-            };
-
-            await unitOfWork.FinishedJobs.CreateAsync(acceptedJob);
-            var employer = await unitOfWork.Users.GetAsync(employerId);
-
-            await finishedJobNotificationService.NotifyAccepted(workerId, jobAdvertisementId, jobAdvertisement.Title, employer.Name);
-            
-            await unitOfWork.CompleteAsync();
-            return Ok("Your application was accepted!");
-        }
-
-        [Authorize(Roles = "Worker")]
-        [HttpDelete("WorkerDeclineApplicationForJob/{finishedJobId}")]
-        public async Task<IActionResult> WorkerDeclineApplicationForJob([FromRoute] string finishedJobId)
-        {
-            var workerId = GetUserId();
-            var finishedJob = await unitOfWork.FinishedJobs.GetAsync(finishedJobId);
-            if (finishedJob == null)
-                return NotFound($"Job Advertisement with ID {finishedJobId} not found.");
-            
-            if (finishedJob.WorkerId != workerId)
-                return BadRequest("This job advertisement is assigned to a different worker.");
-
-            var jobAdvertisementId = finishedJob.JobAdvertisementId;
-            var employerId = finishedJob.EmployerId;
-            var jobAdvertisement = await unitOfWork.JobAdvertisements.GetAsync(jobAdvertisementId);
-
-            jobAdvertisement.MyWorkerId = null;
-            jobAdvertisement.IsAvailable = true;
-
-            await unitOfWork.JobAdvertisements.UpdateAsync(jobAdvertisementId, jobAdvertisement);
-            await unitOfWork.FinishedJobs.DeleteAsync(finishedJobId);
-            var worker = await unitOfWork.Users.GetAsync(workerId);
-
-            await finishedJobNotificationService.NotifyWorkerDeclineApplicationAfterAcception(employerId, jobAdvertisementId, worker.Name);
-            await finishedJobNotificationService.NotifyAvailableAgain(jobAdvertisementId, jobAdvertisement.Title, employerId, jobAdvertisement.JobType);
-            await unitOfWork.CompleteAsync();
-            return Ok("You have declined your application for this job.");
         }
 
         [Authorize(Roles ="Employer")]

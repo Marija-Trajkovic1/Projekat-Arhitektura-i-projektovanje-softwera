@@ -1,5 +1,6 @@
 ﻿using System.Xml.Serialization;
 using TaskIT.DTOs.UserDTOs;
+using TaskIT.DTOs.JobApplicationDTOs;
 namespace TaskIT.Mapping
 {
     public static class UserMapper
@@ -19,7 +20,7 @@ namespace TaskIT.Mapping
                 Street = userModel.Street,
                 HomeNumber = userModel.HomeNumber,
                 UserPostedAdv = userModel.UserPostedAdv.Select(x=>x.ToJobAdvertisementDTO()).ToList(),
-                UserAppliedAdv=userModel.UserAppliedAdv.Select(x => x.ToJobAdvertisementDTO()).ToList()
+                UserAppliedAdv=userModel.UserAppliedAdv.Select(x => x.ToJobApplicationDTO()).ToList()
             };
         }
         public static UserProfileResponse ToUserProfileDTO(this User userModel)

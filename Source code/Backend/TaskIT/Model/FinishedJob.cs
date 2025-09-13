@@ -20,17 +20,17 @@ namespace TaskIT.Model
         public int? WorkerEvaluation { get; set; }
 
         [Required]
-        public string WorkerId { get; set; }
+        public string? WorkerId { get; set; }
         [JsonIgnore]
-        public User Worker { get; set; } = null!;
+        public User? Worker { get; set; } = null!;
 
         public int? EmployerEvaluation { get; set; }
 
         [Required]
-        public string EmployerId { get; set; }
+        public string? EmployerId { get; set; }
 
         [JsonIgnore]
-        public User Employer { get; set; } = null!;   
+        public User? Employer { get; set; } = null!;   
 
     }
 }

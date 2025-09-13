@@ -1,18 +1,21 @@
 import { useState } from "react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
+  const {token} =useAuth();
   const [editMode, setEditMode] = useState(false);
+
   const handleDeleteJobAdv = async () => {
     if (!window.confirm("Da li ste sigurni da želite da obrišete ovaj oglas?")) {
       return;
     }
 
     try{
-      
-      const response =await axios.delete(
-        `https://localhost:7260/JobAdvertisement/DeleteJobAdvertisement?jobAdvertisementId=${ad.id}`,
-        {},
+      const id=ad.id;
+      console.log("Id posla pre brisanja:", id);
+      await axios.delete(
+        `https://localhost:7260/JobAdvertisement/DeleteJobAdvertisement/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -24,9 +27,9 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
     }
   };
 
-  return (
-    <div className="border p-4 mb-4 rounded">
-      <p>
+  return ( 
+    <div className="w-80 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+      <p className="text-lg font-semibold">
         <strong>Naslov oglasa: </strong>
         {ad.title}
       </p>
@@ -65,14 +68,14 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
 
       <button
         onClick={() => setEditMode(true)}
-        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full"
       >
         Izmenite oglas
       </button>
 
       <button
         onClick={handleDeleteJobAdv}
-        className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full"
       >
         Obriši oglas
       </button>

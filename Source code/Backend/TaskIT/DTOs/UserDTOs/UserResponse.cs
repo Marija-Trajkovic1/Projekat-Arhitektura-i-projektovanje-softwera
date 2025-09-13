@@ -1,4 +1,5 @@
 ﻿using TaskIT.DTOs.JobAdvertisementDTOs;
+using TaskIT.DTOs.JobApplicationDTOs;
 
 namespace TaskIT.DTOs.UserDTOs
 {
@@ -14,6 +15,6 @@ namespace TaskIT.DTOs.UserDTOs
         public string Street { get; set; } = string.Empty;
         public int HomeNumber { get; set; }
         public List<JobAdvertisementResponse> UserPostedAdv { get; set; } = new();
-        public List<JobAdvertisementResponse> UserAppliedAdv { get; set; } = new();
+        public List<JobApplicationResponse> UserAppliedAdv { get; set; } = new();
     }
 }

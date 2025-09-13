@@ -14,8 +14,8 @@ namespace TaskIT.Model
         public DbSet<JobAdvertisement> JobAdvertisements { get; set; }
         public DbSet<FinishedJob> FinishedJobs { get; set; }
         public DbSet<UserFollowing> UserFollowings { get; set; }
-
         public DbSet<WorkerJobTypeFollowing> WorkerJobTypeFollowings { get; set; }
+        public DbSet<JobApplication> JobApplications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,45 +28,50 @@ namespace TaskIT.Model
                 .HasForeignKey(o => o.MyEmployerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Jedan korisnik može se prijaviti na više oglasa
-            modelBuilder.Entity<JobAdvertisement>()
-                .HasOne(o => o.MyWorker)
-                .WithMany(k => k.UserAppliedAdv)
-                .HasForeignKey(o => o.MyWorkerId)
-                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<JobApplication>()
+                .HasKey(ja => new { ja.JobId, ja.WorkerId });
 
-            // Veza OdradjeniPosao -> Radnik
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(ja => ja.JobAdvertisement)
+                .WithMany(j => j.JobApplications)
+                .HasForeignKey(ja => ja.JobId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(ja => ja.Worker)
+                .WithMany(u => u.UserAppliedAdv)
+                .HasForeignKey(ja => ja.WorkerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<FinishedJob>()
                 .HasOne(p => p.Worker)
                 .WithMany()
                 .HasForeignKey(p => p.WorkerId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Veza OdradjeniPosao -> Poslodavac
             modelBuilder.Entity<FinishedJob>()
                 .HasOne(p => p.Employer)
                 .WithMany()
                 .HasForeignKey(p => p.EmployerId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Veza OdradjeniPosao -> Oglas
             modelBuilder.Entity<FinishedJob>()
                 .HasOne(p => p.JobAdvertisement)
                 .WithMany()
                 .HasForeignKey(p => p.JobAdvertisementId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserFollowing>()
+                .HasOne(uf => uf.Follower)
+                .WithMany()
+                .HasForeignKey(uf => uf.FollowerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UserFollowing>()
-                .HasOne<User>(uf => uf.Follower)
-                .WithMany()
-                .HasForeignKey(uf => uf.FollowerId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<UserFollowing>()
-                .HasOne<User>(uf => uf.Followed)
+                .HasOne(uf => uf.Followed)
                 .WithMany()
                 .HasForeignKey(uf => uf.FollowedId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -2,7 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import JobAdvertisement from "./JobAdvertisement";
 
-const JobList = ({ refreshJobAds, refreshTrigger }) => {
+const JobList = ({ refreshJobAds, refreshTrigger, setRefreshTrigger }) => {
   const [jobAdvList, setJobAdvList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +34,7 @@ const JobList = ({ refreshJobAds, refreshTrigger }) => {
       <div className="flex flex-row flex-wrap gap-4">
         {" "}
         {jobAdvList.map((ad) => (
-          <JobAdvertisement key={ad.id} ad={ad} />
+          <JobAdvertisement key={ad.id} ad={ad} setRefreshTrigger={setRefreshTrigger} />
         ))}
       </div>
     );

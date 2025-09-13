@@ -28,6 +28,6 @@ namespace TaskIT.Model
         public int HomeNumber { get; set; }
         public List<JobAdvertisement> UserPostedAdv { get; set; } = new ();
 
-        public List<JobAdvertisement> UserAppliedAdv { get; set; } = new ();
+        public List<JobApplication> UserAppliedAdv { get; set; } = new ();
     }
 }

@@ -208,6 +208,7 @@ const ManageJobAds = () => {
         <JobList
           refreshJobAds={refreshJobAds}
           refreshTrigger={refreshTrigger}
+          setRefreshTrigger={setRefreshTrigger}
         />
       </div>
     </div>
