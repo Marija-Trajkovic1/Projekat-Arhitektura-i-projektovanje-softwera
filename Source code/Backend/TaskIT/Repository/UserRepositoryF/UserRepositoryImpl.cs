@@ -14,7 +14,7 @@ namespace TaskIT.Repository.UserRepositoryF
             var user = await context.Users.FindAsync(userId);
             if (user == null)
             {
-                throw new KeyNotFoundException($"Korisnik sa ID {userId} nije pronađen.");
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
             }
 
             user.PhoneNumber = userForUpdate.PhoneNumber;

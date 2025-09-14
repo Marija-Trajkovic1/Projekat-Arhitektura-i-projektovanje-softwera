@@ -20,29 +20,21 @@ namespace TaskIT.Controllers
     {
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
         private readonly UserRepository userRepository;
-        private readonly UserFollowingRepository userFollowingRepository;
-        private readonly WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository;
         private readonly JobApplicationRepository jobApplicationRepository;
         private readonly JobAdvertisementNotificationService jobAdvertisementNotificationService;
-        private readonly JobApplicationNotificationService jobApplicationNotificationService;
         private readonly JobFilterStrategyFactory jobFilterStrategyFactory;
 
-        public JobAdvertisementController(JobAdvertisementRepository jobAdvertisementRepository, 
+        public JobAdvertisementController(
+            JobAdvertisementRepository jobAdvertisementRepository, 
             UserRepository userRepository, 
-            UserFollowingRepository userFollowingRepository, 
-            WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository, 
             JobApplicationRepository jobApplicationRepository,
-            JobAdvertisementNotificationService jobAdvertisementNotificationService, 
-            JobApplicationNotificationService jobApplicationNotificationService,
+            JobAdvertisementNotificationService jobAdvertisementNotificationService,
             JobFilterStrategyFactory jobFilterStrategyFactory)
         {
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.userRepository = userRepository;
-            this.userFollowingRepository = userFollowingRepository;
-            this.workerJobTypeFollowingRepository = workerJobTypeFollowingRepository;
             this.jobApplicationRepository = jobApplicationRepository;
             this.jobAdvertisementNotificationService = jobAdvertisementNotificationService;
-            this.jobApplicationNotificationService = jobApplicationNotificationService;
             this.jobFilterStrategyFactory = jobFilterStrategyFactory;   
         }
 
@@ -95,20 +87,20 @@ namespace TaskIT.Controllers
         [HttpPut("UpdateJobAdvertisement/{jobAdvertisementId}")]
         public async Task<IActionResult> UpdateJobAdvertisement([FromBody] UpdateJobAdvertisementRequest jobAdvertisementDTO, [FromRoute] string jobAdvertisementId)
         {
-            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
+            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId)==null)
             {
-                var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromUpdateJobAdvertisementRequest(jobAdvertisementId);
-                var jobAdvertisementUpdated = await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
-
-                var jobApplication = await jobApplicationRepository.GetAcceptedJobApplication(jobAdvertisementId);
-               
-                await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdated(jobAdvertisement.Id, jobAdvertisement.Title, jobApplication.WorkerId, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
-                return Ok(jobAdvertisement.ToJobAdvertisementDTO());
+                return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
             }
-            return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
-        }
+            
+            var jobAdvertisementUpdated = await jobAdvertisementRepository.UpdateJobAdvertisementAsync(jobAdvertisementId, jobAdvertisementDTO);
 
-        
+            var jobApplication = await jobApplicationRepository.GetAcceptedJobApplication(jobAdvertisementId);
+            if(jobApplication != null)
+            {
+                await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdated(jobAdvertisementId, jobAdvertisementUpdated.Title, jobApplication.WorkerId, jobAdvertisementUpdated.MyEmployerId, jobAdvertisementUpdated.JobType);
+            }
+            return Ok(jobAdvertisementUpdated.ToJobAdvertisementDTO());
+        }
 
         [Authorize(Roles ="EMPLOYER")]
         [HttpDelete("DeleteJobAdvertisement/{jobAdvertisementId}")]

@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using TaskIT.DTOs.UserDTOs;
-using TaskIT.Hubs;
 using TaskIT.Mapping;
-using TaskIT.Model;
-using TaskIT.Repository.UnityOfWork;
 using TaskIT.Repository.UserRepositoryF;
 
 namespace TaskIT.Controllers

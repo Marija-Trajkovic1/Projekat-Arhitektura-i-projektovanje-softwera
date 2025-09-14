@@ -1,7 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
 import { useState, useCallback } from "react";
 import axios from "axios";
-import JobList from "../../components/JobList";
+import JobList from "../../components/Employer/JobList";
 
 const ManageJobAds = () => {
   const { token, role } = useAuth();

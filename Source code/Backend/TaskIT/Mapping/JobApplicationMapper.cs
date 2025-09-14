@@ -18,6 +18,19 @@ namespace TaskIT.Mapping
 
         }
 
+        public static JobApplicationWithUsernameResponse ToJobApplicationWithUsernameResponse(this JobApplication jobApplication)
+        {
+            if (jobApplication == null) return null;
+            return new JobApplicationWithUsernameResponse()
+            {
+                Id = jobApplication.Id,
+                JobId = jobApplication.JobId,
+                WorkerId = jobApplication.WorkerId,
+                WorkerUserName = jobApplication.Worker.UserName,
+                IsAccepted = jobApplication.IsAccepted
+            };
+        }
+
         public static JobApplication ToJobApplicationFromCreateJobApplicationRequest(this CreateJobApplicationRequest jobApplicationDTO) 
         {
             if (jobApplicationDTO == null) return null;

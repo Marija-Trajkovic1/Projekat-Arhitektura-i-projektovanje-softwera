@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Security.Claims;
 using TaskIT.Communication.NotificationServices;
 using TaskIT.Mapping;
+using TaskIT.Model;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
 using TaskIT.Repository.UnityOfWork;
@@ -12,19 +14,21 @@ namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class JobApplicationControler : ControllerBase
+    public class JobApplicationController : ControllerBase
     {
         private readonly JobApplicationRepository jobApplicationRepository;
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
         private readonly UserRepository userRepository;
+        private readonly UnitOfWork unitOfWork;
         private readonly JobApplicationNotificationService jobApplicationNotificationService;
         private readonly JobAdvertisementNotificationService jobAdvertisementNotificationService;
         private readonly FinishedJobNotificationService finishedJobNotificationService;
 
-        public JobApplicationControler(
+        public JobApplicationController(
             JobApplicationRepository jobApplicationRepository, 
             JobAdvertisementRepository jobAdvertisementRepository, 
             UserRepository userRepository, 
+            UnitOfWork unitOfWork,
             JobApplicationNotificationService jobApplicationNotificationService, 
             JobAdvertisementNotificationService jobAdvertisementNotificationService,
             FinishedJobNotificationService finishedJobNotificationService)
@@ -32,9 +36,20 @@ namespace TaskIT.Controllers
             this.jobApplicationRepository = jobApplicationRepository;
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.userRepository = userRepository;
+            this.unitOfWork = unitOfWork;
             this.jobApplicationNotificationService = jobApplicationNotificationService;
             this.jobAdvertisementNotificationService = jobAdvertisementNotificationService;
             this.finishedJobNotificationService = finishedJobNotificationService;
+        }
+
+        [Authorize(Roles ="EMPLOYER")]
+        [HttpGet("GetJobApplicationsForJobAdd/{jobAdvertisementId}")]
+        public async Task<IActionResult> GetJobApplicationsForJobAdd([FromRoute]string jobAdvertisementId)
+        {
+            var jobApplications = await jobApplicationRepository.GetAllApplicationsForJob(jobAdvertisementId);
+            var jobApplicationsDTO = jobApplications.Select(ja => ja.ToJobApplicationWithUsernameResponse());
+
+            return Ok(jobApplicationsDTO);
         }
 
         [Authorize(Roles = "WORKER")]
@@ -63,21 +78,22 @@ namespace TaskIT.Controllers
         }
 
         [Authorize(Roles = "EMPLOYER")]
-        [HttpPut("DeclineApplicationForJobByEmployer/{jobAdvertisementId}")]
-        public async Task<IActionResult> DeclineaApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        [HttpPut("DeclineApplicationForJobByEmployer/{jobApplicationId}")]
+        public async Task<IActionResult> DeclineaApplicationForJobByEmployer([FromRoute] string jobApplicationId, [FromBody] string workerId)
         {
-            var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
-            if (jobAdvertisement == null)
-                return NotFound($"Job Advertisement with ID {jobAdvertisementId} not found.");
+            var jobApplicationAccepted = await jobApplicationRepository.GetAcceptedJobApplication(jobApplicationId);
+            if (jobApplicationAccepted.WorkerId!=workerId || jobApplicationAccepted.IsAccepted == true)
+                return BadRequest("This job advertisement decline acception is not possible.");
+            var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobApplicationAccepted.JobId);
 
-            var jobApplication = await jobApplicationRepository.GetAcceptedJobApplication(jobAdvertisementId);
-
-            await jobApplicationRepository.DeleteAsync(jobApplication.Id);
+            await jobApplicationRepository.DeleteAsync(jobApplicationAccepted.Id);
             jobAdvertisement.IsAvailable = true;
-            await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+            await jobAdvertisementRepository.UpdateAsync(jobApplicationAccepted.JobId, jobAdvertisement);
 
-            await jobAdvertisementNotificationService.NotifyJobApplicationRejected(workerId, jobAdvertisementId, jobAdvertisement.Title);
-            await jobAdvertisementNotificationService.NotifyAvailableAgain(jobAdvertisementId, jobAdvertisement.Title, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
+            await unitOfWork.CompleteAsync();
+
+            await jobAdvertisementNotificationService.NotifyJobApplicationRejected(workerId, jobApplicationAccepted.JobId, jobAdvertisement.Title);
+            await jobAdvertisementNotificationService.NotifyAvailableAgain(jobApplicationAccepted.JobId, jobAdvertisement.Title, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
             return Ok("Your application was declined!");
         }
 
@@ -97,6 +113,8 @@ namespace TaskIT.Controllers
             jobAdvertisement.IsAvailable = true;
             await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
 
+            await unitOfWork.CompleteAsync();
+
             var worker = await userRepository.GetAsync(workerId);
 
             await jobApplicationNotificationService.NotifyApplicationDeclined(jobAdvertisement.MyEmployerId, workerId, jobAdvertisementId);
@@ -105,22 +123,25 @@ namespace TaskIT.Controllers
         }
 
         [Authorize(Roles = "EMPLOYER")]
-        [HttpPut("AcceptApplicationForJob/{jobAdvertisementId}")]
-        public async Task<IActionResult> AcceptApplicationForJob([FromBody] string workerId, [FromRoute] string jobAdvertisementId)
+        [HttpPut("AcceptApplicationForJob/{jobApplicationId}")]
+        public async Task<IActionResult> AcceptApplicationForJob([FromRoute] string jobApplicationId)
         {
-            var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
-
-            var jobApplicationAccepted = await jobApplicationRepository.GetAcceptedJobApplication(jobAdvertisementId);
+            var jobApplicationAccepted = await jobApplicationRepository.GetAcceptedJobApplication(jobApplicationId);
             if (jobApplicationAccepted.IsAccepted ==true)
                 return BadRequest("This job advertisement application is already accepted.");
 
+            var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobApplicationAccepted.JobId);
+
             jobAdvertisement.IsAvailable = false;
             jobApplicationAccepted.IsAccepted = true;
+            var workerId=jobApplicationAccepted.WorkerId;
 
-            await jobAdvertisementRepository.UpdateAsync(jobAdvertisementId, jobAdvertisement);
+            await jobAdvertisementRepository.UpdateAsync(jobApplicationAccepted.JobId, jobAdvertisement);
             await jobApplicationRepository.UpdateAsync(jobApplicationAccepted.Id, jobApplicationAccepted);
 
-            await finishedJobNotificationService.NotifyAccepted(workerId, jobAdvertisementId, jobAdvertisement.Title, jobAdvertisement.MyEmployer.Name);
+            await unitOfWork.CompleteAsync();
+
+            await finishedJobNotificationService.NotifyAccepted(workerId, jobApplicationAccepted.JobId, jobAdvertisement.Title, jobAdvertisement.MyEmployer.Name);
 
             return Ok("Your application was accepted!");
         }

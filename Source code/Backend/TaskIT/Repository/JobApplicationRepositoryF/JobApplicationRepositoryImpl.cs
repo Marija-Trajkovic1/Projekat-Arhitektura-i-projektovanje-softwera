@@ -15,6 +15,12 @@ namespace TaskIT.Repository.JobApplicationRepositoryF
             return jobApplication;
         }
 
+        public async Task<List<JobApplication>> GetAllApplicationsForJob(string jobAdvertisementId)
+        {
+            var jobApplications = await context.JobApplications.Include(ja=>ja.Worker).Where(ja => ja.JobId == jobAdvertisementId).ToListAsync();
+            return jobApplications;
+        }
+
         public async Task<JobApplication> GetExistingJobApplication(string jobAdvertisementId, string workerId)
         {
             var jobApplication = await context.JobApplications.FirstOrDefaultAsync(ja => ja.JobId == jobAdvertisementId && ja.WorkerId == workerId);

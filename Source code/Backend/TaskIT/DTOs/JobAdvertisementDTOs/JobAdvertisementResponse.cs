@@ -18,6 +18,5 @@ namespace TaskIT.DTOs.JobAdvertisementDTOs
         public int JobSalary { get; set; }
         public string JobType { get; set; } = string.Empty;
         public string MyEmployerId { get; set; } = string.Empty;
-        public string? MyWorkerId { get; set; }
     }
 }

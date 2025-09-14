@@ -5,22 +5,17 @@ using TaskIT.Communication.NotificationServices;
 using TaskIT.DTOs.FinishedJobDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
-using TaskIT.Repository.JobApplicationRepositoryF;
-using TaskIT.Repository.UnityOfWork;
 
 namespace TaskIT.Controllers
 {
     public class FinishedJobController : Controller
     {
-        private readonly UnitOfWork unitOfWork;
         private readonly FinishedJobRepository finishedJobRepository;
-        private readonly JobApplicationRepository jobApplicationRepository;
         private readonly FinishedJobNotificationService finishedJobNotificationService;
-        public FinishedJobController(FinishedJobRepository finishedJobRepository,JobApplicationRepository jobApplicationRepository,  UnitOfWork unitOfWork, FinishedJobNotificationService finishedJobNotificationService)
+        public FinishedJobController(FinishedJobRepository finishedJobRepository, FinishedJobNotificationService finishedJobNotificationService)
         {
             this.finishedJobRepository = finishedJobRepository;
             this.finishedJobNotificationService = finishedJobNotificationService;
-            this.unitOfWork = unitOfWork;
         }
 
         [HttpGet("FindAllFinishedJobsForWorker")]

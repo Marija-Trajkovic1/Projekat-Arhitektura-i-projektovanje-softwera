@@ -31,5 +31,27 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
                 .Where(j => j.MyEmployerId == null || j.MyEmployerId != employerId).ToListAsync();
             return availableJobAdvertisements;
         }
+
+        public async Task<JobAdvertisement> UpdateJobAdvertisementAsync(string jobAdvertisementId, UpdateJobAdvertisementRequest jobAdvertisement)
+        {
+            var jobAdvertisementForUpdate = await context.JobAdvertisements.FindAsync(jobAdvertisementId);
+            if (jobAdvertisementForUpdate == null){
+                throw new KeyNotFoundException($"Job advertisement with ID {jobAdvertisementId} not found!");            
+            }
+
+            jobAdvertisementForUpdate.Title = jobAdvertisement.Title;
+            jobAdvertisementForUpdate.ShortDescription = jobAdvertisement.ShortDescription;
+            jobAdvertisementForUpdate.City=jobAdvertisement.City;
+            jobAdvertisementForUpdate.Street=jobAdvertisement.Street;
+            jobAdvertisementForUpdate.HomeNumber=jobAdvertisement.HomeNumber;
+            jobAdvertisementForUpdate.DateOfExecution = jobAdvertisement.DateOfExecution;
+            jobAdvertisementForUpdate.WorkDuration = jobAdvertisement.WorkDuration;
+            jobAdvertisementForUpdate.IsAvailable=jobAdvertisement.IsAvailable;
+            jobAdvertisementForUpdate.JobSalary = jobAdvertisement.JobSalary;
+            jobAdvertisementForUpdate.JobType = jobAdvertisement.JobType;
+
+            await context.SaveChangesAsync();
+            return jobAdvertisementForUpdate;
+        }
     }
 }

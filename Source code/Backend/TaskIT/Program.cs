@@ -11,6 +11,8 @@ using TaskIT.Filters;
 using TaskIT.Hubs;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
+using TaskIT.Repository.JobApplicationRepositoryF;
+using TaskIT.Repository.UnityOfWork;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
@@ -38,7 +40,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5174")
+            policy.WithOrigins("http://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -107,6 +109,8 @@ builder.Services.AddScoped<FinishedJobRepository, FinishedJobRepositoryImpl>();
 builder.Services.AddScoped<JobAdvertisementRepository, JobAdvertisementRepositoryImpl>();
 builder.Services.AddScoped<UserFollowingRepository, UserFollowingRepositoryImpl>();
 builder.Services.AddScoped<WorkerJobTypeFollowingRepository, WorkerJobTypeFollowingRepositoryImpl>();
+builder.Services.AddScoped<JobApplicationRepository, JobApplicationRepositoryImpl>();
+builder.Services.AddScoped<UnitOfWork, UnitOfWorkImpl>();
 
 builder.Services.AddSingleton<JobFilterStrategyFactory>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

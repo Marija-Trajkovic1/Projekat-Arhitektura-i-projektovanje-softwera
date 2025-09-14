@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TaskIT.DTOs.UserDTOs;
+﻿using TaskIT.DTOs.UserDTOs;
 
 
 namespace TaskIT.Repository.UserRepositoryF

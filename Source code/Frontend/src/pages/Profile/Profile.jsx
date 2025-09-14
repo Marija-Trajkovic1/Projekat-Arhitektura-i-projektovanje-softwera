@@ -164,6 +164,7 @@ const Profile = () => {
         className={inputStyle}
         placeholder="Kućni broj"
       />
+
       <div className="flex gap-2 mt-2">
         <button
           onClick={handleUpdate}
@@ -180,6 +181,7 @@ const Profile = () => {
           Otkaži
         </button>
       </div>
+      
     </>
   );
 
@@ -234,7 +236,7 @@ const Profile = () => {
         className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600 ml-2"
         disabled={isLoading}
       >
-       {isLoading ? "Obrada...":role==="WORKER"? "Postni poslodavac" : "Postani radnik"}
+       {isLoading ? "Obrada...":role==="WORKER"? "Postani poslodavac" : "Postani radnik"}
       </button>
 
       <button
@@ -248,7 +250,7 @@ const Profile = () => {
 
   return (
     <div className="p-6 max-w-3x1 mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Pregledajte ili azurirajte vase podatke</h1>
+      <h1 className="text-3xl font-bold mb-4">Pregledajte ili ažurirajte Vaše podatke: </h1>
       <div className="bg-white p-4 rounded shadow mb-4">
         {editMode ? editeModeInput : displayModeShow}
       </div>
