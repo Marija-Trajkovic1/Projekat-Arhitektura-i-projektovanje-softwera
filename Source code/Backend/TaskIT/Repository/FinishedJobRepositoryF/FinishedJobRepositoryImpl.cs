@@ -48,7 +48,7 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
         {
             var finishedJobsPoints = await context.FinishedJobs
                 .Where(fj => fj.WorkerId == workerId)
-                .Select(fj => fj.WorkerEvaluation ?? 0) // Assuming 0 for null evaluations
+                .Select(fj => fj.WorkerEvaluation ?? 0) 
                 .ToListAsync();
             return finishedJobsPoints;
         }
@@ -57,7 +57,7 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
         {
             var finishedJobsPoints = await context.FinishedJobs
                 .Where(fj => fj.WorkerId == employerId)
-                .Select(fj => fj.WorkerEvaluation ?? 0) // Assuming 0 for null evaluations
+                .Select(fj => fj.WorkerEvaluation ?? 0) 
                 .ToListAsync();
             return finishedJobsPoints;
         }

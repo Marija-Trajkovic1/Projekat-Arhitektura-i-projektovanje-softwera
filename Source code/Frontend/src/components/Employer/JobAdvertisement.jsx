@@ -100,8 +100,8 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
       {editMode ? (
         <JobAdvertisementForm
           formData={formData}
-          onChange={handleInputChange}
-          onSubmit={handleUpdateJobAdvertisement}
+          setFormData={setFormData}
+          onSave={handleUpdateJobAdvertisement}
           onCancel={() => setEditMode(false)}
           isLoading={isLoading}
         />

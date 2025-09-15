@@ -91,14 +91,14 @@ const JobAdvertisementForm =({formData, setFormData, onSave, onCancel, isLoading
 
       <div className="flex gap-2 mt-2">
         <button
-          onClick={handleUpdateJobAdvertisement}
+          onClick={onSave}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           disabled={isLoading}
         >
           {isLoading ? "Čuvanje..." : "Ažuriraj oglas"}
         </button>
         <button
-          onClick={() => setEditMode(false)}
+          onClick={onCancel}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-bray-600"
           disabled={isLoading}
         >

@@ -9,6 +9,12 @@ namespace TaskIT.Repository.UserRepositoryF
        {
        }
 
+        public async Task<List<User>> GetEmployersForWorker(string workerId)
+        {
+            var users = await context.Users.Where(u => u.Id != workerId && u.UserPostedAdv.Any()).ToListAsync();
+            return users;
+        }
+
         public async Task<User> UpdateUserAsync(string userId, UpdateUserRequest userForUpdate)
         {
             var user = await context.Users.FindAsync(userId);

@@ -7,6 +7,8 @@ namespace TaskIT.Model
     public class WorkerJobTypeFollowing
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
         public string Id { get; set; }
 
         [Required]

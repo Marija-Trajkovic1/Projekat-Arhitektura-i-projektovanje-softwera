@@ -9,12 +9,11 @@ namespace TaskIT.Model
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
-
         [Required]
         public string FollowerId { get; set; }
-        public User Follower { get; set; } = new User();
+        public User Follower { get; set; }
         [Required]
         public string FollowedId { get; set; }
-        public User Followed { get; set; } = new User();
+        public User Followed { get; set; }
     }
 }

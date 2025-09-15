@@ -16,6 +16,17 @@ namespace TaskIT.Filters
                 },
 
                 {
+                    "employerList",
+                    (new EmployersListFilterStrategyImpl(), filterValue =>
+                         {
+                            var list = filterValue as List<string>;
+                            if (list == null || !list.Any())
+                                return "At least one employer ID is required for employer list filter.";
+                            return null;
+                    })
+                },
+
+                {
                     "salary",
                     (new SalaryFilterStrategyImpl(), filterValue =>
                     {
@@ -31,22 +42,36 @@ namespace TaskIT.Filters
                 },
 
                 {
+                    "jobtypeList",
+                    (new JobTypesListFilterStrategyImpl(), filterValue =>
+                    {
+                    var list = filterValue as List<string>;
+                    if (list == null || !list.Any())
+                        return "At least one job type is required for job type list filter.";
+                    return null;
+                    })
+                },
+
+                {
                     "city",
                     (new CityFilterStrategyImpl(), filterValue => string.IsNullOrEmpty(filterValue as string) ? "City is required for city filter." :null)
                 }
             };
         }
 
-        public (JobFilterStrategy Strategy, object FilterValue) GetStrategyAndValue(string filterBy, string? employerId, int? minSalary, int? maxSalary, string? jobType, string? city)
+        public (JobFilterStrategy Strategy, object FilterValue) GetStrategyAndValue(string filterBy, string? employerId, List<string>? employerIds, int? minSalary, int? maxSalary, List<string>? jobTypes, string? jobType, string? city)
         {
             if (string.IsNullOrEmpty(filterBy) || !strategies.ContainsKey(filterBy))
                 throw new ArgumentException($"Ivalid filter criteria!");
+
             var (strategy, validator) = strategies[filterBy];
             object filterValue = filterBy.ToLower() switch
             {
                 "employer" => employerId,
-                "salary" => new Tuple<int,int>(minSalary ?? 0, maxSalary ?? 0),
+                "employerList"=>employerIds,
+                "salary" => new Tuple<int, int>(minSalary ?? 0, maxSalary ?? 0),
                 "jobtype" => jobType,
+                "jobtypeList"=>jobTypes,
                 "city" => city,
                 _ => throw new ArgumentException($"Invalid filter criteria!")
             };

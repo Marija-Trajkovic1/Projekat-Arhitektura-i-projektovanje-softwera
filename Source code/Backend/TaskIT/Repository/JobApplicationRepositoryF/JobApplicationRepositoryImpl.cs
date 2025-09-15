@@ -4,9 +4,9 @@ namespace TaskIT.Repository.JobApplicationRepositoryF
 {
     public class JobApplicationRepositoryImpl : RepositoryImpl<JobApplication>, JobApplicationRepository
     {
-            public JobApplicationRepositoryImpl(TaskITContext context) : base(context)
-            {
-            }
+        public JobApplicationRepositoryImpl(TaskITContext context) : base(context)
+        {
+        }
 
         //prostor za strategy ove dve
         public async Task<JobApplication> GetAcceptedJobApplication(string jobAdvertisementId)

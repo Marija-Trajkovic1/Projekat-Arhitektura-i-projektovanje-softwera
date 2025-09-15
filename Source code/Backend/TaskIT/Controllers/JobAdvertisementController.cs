@@ -48,11 +48,10 @@ namespace TaskIT.Controllers
             return Ok(jobAdvertisement.ToJobAdvertisementDTO());
         }
 
-        [Authorize(Roles = "Worker")]
-        [HttpGet("FindAvailableJobs")]
-        public async Task<IActionResult> FindAvailableJobs()
+        [Authorize(Roles = "WORKER")]
+        [HttpGet("FindAvailableJobs/{employerId}")]
+        public async Task<IActionResult> FindAvailableJobs([FromRoute] string employerId)
         {
-            var employerId = GetUserId();
             var availableJobAdvertisements = await jobAdvertisementRepository.GetAvailableJobAdvertisementsAsync(employerId);
             var availableJobAdvertisementsDTO = availableJobAdvertisements.Select(a => a.ToJobAdvertisementDTO());
             return Ok(availableJobAdvertisementsDTO);
@@ -115,8 +114,11 @@ namespace TaskIT.Controllers
         [HttpGet("GetFilteredJobAdvertisements")]
         public async Task<IActionResult> GetFilteredJobAdvertisements(
             [FromQuery] string filterBy,
+            [FromQuery] string? employerId,
+            [FromQuery] List<string>? employerIds,
             [FromQuery] int? minSalary,
             [FromQuery] int? maxSalary,
+            [FromQuery] List<string>? jobTypes,
             [FromQuery] string? jobType,
             [FromQuery] string? city,
             [FromQuery] int page = 1,
@@ -124,8 +126,8 @@ namespace TaskIT.Controllers
         {
             try
             {
-                var employerId = GetUserId();
-                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId, minSalary, maxSalary, jobType, city);
+                var userId = GetUserId();
+                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId,employerIds, minSalary, maxSalary, jobTypes,jobType, city);
                 var allJobAdvertisements = jobAdvertisementRepository.GetAllQueryable();
                 var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)
                         .Skip((page - 1) * pageSize)

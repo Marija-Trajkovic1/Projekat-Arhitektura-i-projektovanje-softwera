@@ -3,9 +3,6 @@ import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({children})=>{
     const {token, role, loading} = useAuth();
-    
-    
-
     if(loading) return <div>Učitavanje...</div>;
     
     if(!token || !["WORKER", "EMPLOYER"].includes(role)){

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskIT.DTOs.UserDTOs;
+using TaskIT.DTOs.UserFollowingDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.UserRepositoryF;
 
@@ -46,5 +47,19 @@ namespace TaskIT.Controllers
             await userRepository.DeleteAsync(userId);
             return NoContent();
         }
+
+        [Authorize(Roles ="WORKER")]
+        [HttpGet("GetEmployers")]
+        public async Task<IActionResult> GetEmployers()
+        {
+            var workerId = GetUserId();
+            var employers = await userRepository.GetEmployersForWorker(workerId);
+            var employerResponse = employers.Select(e=>e.ToEmployerResponseFromUser());
+            return Ok(employerResponse);
+
+        }
+
+        private string GetUserId() =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

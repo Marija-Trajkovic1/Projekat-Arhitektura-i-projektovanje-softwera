@@ -33,18 +33,7 @@ namespace TaskIT.Services
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
-            //debuuug
-            var issuer = configuration["Jwt:Issuer"];
-            var audience = configuration["Jwt:Audience"];
-            var key = configuration["Jwt:Key"];
-
-            Console.WriteLine($"Issuer: {issuer}, Audience: {audience}, Key: {key}");
-
-            if (string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience) || string.IsNullOrEmpty(key))
-            {
-                throw new InvalidOperationException("JWT configuration is missing in appsettings.json");
-            }
-
+            
             var authSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
             var token = new JwtSecurityToken (
                 issuer: configuration["Jwt:Issuer"],

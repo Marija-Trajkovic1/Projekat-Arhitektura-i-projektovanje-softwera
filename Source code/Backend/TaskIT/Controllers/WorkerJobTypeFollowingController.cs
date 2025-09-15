@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TaskIT.DTOs.WorkerJobTypeDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
@@ -17,27 +18,57 @@ namespace TaskIT.Controllers
             this.workerJobTypeFollowingRepository = workerJobTypeFollowingRepository;
         }
 
-        [Authorize(Roles ="Worker")]
-        [HttpPost("AddNewFollowing")]
-        public async Task<IActionResult> AddNewFollowing([FromBody] CreateWorkerJobTypeFollowingRequest createWorkerJobType)
+        [Authorize(Roles ="WORKER")]
+        [HttpPost("AddNewFollowing/{jobType}")]
+        public async Task<IActionResult> AddNewFollowing([FromRoute]string jobType)
         {
-            if(createWorkerJobType == null)
+            var workerId = GetUserId();
+            var existingFollowing = await workerJobTypeFollowingRepository.GetAsyncByWorkerAndType(workerId, jobType);
+            if (existingFollowing == null)
             {
-                return BadRequest("Data for worker job type following is null.");
+                var workerJobTypeFollowing = new WorkerJobTypeFollowing
+                {
+                    WorkerId = workerId,
+                    JobType = jobType
+                };
+
+                var createdFollowing = await workerJobTypeFollowingRepository.CreateAsync(workerJobTypeFollowing);
+                return Ok(createdFollowing);
             }
-            var workerJobTypeFollowing = createWorkerJobType.ToWorkerJobTypeFollowingFromCreateWorkerJobTypeFollowingRequest();
-            await workerJobTypeFollowingRepository.CreateAsync(workerJobTypeFollowing);
-            return CreatedAtAction(nameof(AddNewFollowing), new { id = workerJobTypeFollowing.Id }, workerJobTypeFollowing);
+            return BadRequest("Following already exists.");
         }
 
         [HttpGet("GetWorkersByJobType/{jobType}")]
-        public async Task<IActionResult> GetWorkersByJobType(string jobType)
+        public async Task<IActionResult> GetWorkersByJobType([FromRoute]string jobType)
         {
             var workersIds = await workerJobTypeFollowingRepository.GetWorkersByJobTypeAsync(jobType);
             if(workersIds == null || workersIds.Count == 0)
                 return NotFound("No workers found for the specified job type.");
             return Ok(workersIds);
         }
+
+        [Authorize(Roles ="WORKER")]
+        [HttpGet("GetTypesForWorker")]
+        public async Task<IActionResult> GetTypesForWorker()
+        {
+            var workerId = GetUserId();
+            var followingTypes = await workerJobTypeFollowingRepository.GetFollowedAsync(workerId);
+            return Ok(followingTypes);
+        }
+
+        [Authorize(Roles =("WORKER"))]
+        [HttpDelete("DeleteFollowing/{jobType}")]
+        public async Task<IActionResult> DeleteFollowing([FromRoute]string jobType)
+        {
+            var workerId = GetUserId();
+            var following = await workerJobTypeFollowingRepository.GetAsyncByWorkerAndType(workerId, jobType);
+            if (following == null) return BadRequest("Following not exist!");
+            await workerJobTypeFollowingRepository.DeleteAsync(following.Id);
+            return Ok();
+        }
+
+        private string GetUserId() =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
 
     }
 }

@@ -6,5 +6,6 @@ namespace TaskIT.Repository.UserRepositoryF
     public interface UserRepository:Repository<User>
     {
         Task<User> UpdateUserAsync(string id, UpdateUserRequest entity);
+        Task<List<User>> GetEmployersForWorker(string workerId);
     }
 }
