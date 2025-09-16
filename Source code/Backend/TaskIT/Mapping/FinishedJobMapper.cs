@@ -27,5 +27,28 @@ namespace TaskIT.Mapping
                 EmployerEvaluation = finishedJobDTO.EmployerEvaluation
             };
         }
+
+        public static FinishedJobAdvertisementResponse ToFinishedJobAdvertisementResponseEvaluation(this JobAdvertisement jobAdvertisementModel, string finishedJobId, int employerEvaluation)
+        {
+            if (jobAdvertisementModel == null) return null;
+            return new FinishedJobAdvertisementResponse()
+            {
+                Id = jobAdvertisementModel.Id,
+                Title = jobAdvertisementModel.Title,
+                ShortDescription = jobAdvertisementModel.ShortDescription,
+                City = jobAdvertisementModel.City,
+                Street = jobAdvertisementModel.Street,
+                HomeNumber = jobAdvertisementModel.HomeNumber,
+                DateOfExecution = jobAdvertisementModel.DateOfExecution,
+                WorkDuration = jobAdvertisementModel.WorkDuration,
+                IsAvailable = jobAdvertisementModel.IsAvailable,
+                JobSalary = jobAdvertisementModel.JobSalary,
+                JobType = jobAdvertisementModel.JobType,
+                FinishedJobId= finishedJobId,
+                EmployerEvaluation=employerEvaluation
+
+            };
+
+        }
     }
 }

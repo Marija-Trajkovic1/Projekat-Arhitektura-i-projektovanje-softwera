@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { jobTypes } from "../../constants/JobTypes";
 
-const JobTypeFollowing = () => {
+const JobTypeFollowing = ({onJobTypeChange}) => {
   const { token } = useAuth();
   const [followedJobTypes, setFollowedJobTypes] = useState([]);
 
@@ -16,7 +16,9 @@ const JobTypeFollowing = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        const types=response.data || [];
         setFollowedJobTypes(response.data || []);
+        onJobTypeChange(types);
       } catch (error) {
         console.log(
           "Neuspelo dohvatanje tipova koje pratite!",
@@ -25,7 +27,7 @@ const JobTypeFollowing = () => {
       }
     };
     getFollowedTypes();
-  }, [token]);
+  }, [token, onJobTypeChange]);
 
   const clickOnJobType = async (type) => {
     const jobType=encodeURIComponent(type);
@@ -53,7 +55,9 @@ const JobTypeFollowing = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      const updatedTypes = refreshed.data || [];
       setFollowedJobTypes(refreshed.data || []);
+      onJobTypeChange(updatedTypes);
     } catch (error) {
       console.error("Neuspešno osvežavanje liste prećenja tipova oglasa", error.response?.data || error.response);
     }

@@ -1,4 +1,5 @@
-﻿using TaskIT.DTOs.FinishedJobDTOs;
+﻿using System.Security.Cryptography.X509Certificates;
+using TaskIT.DTOs.FinishedJobDTOs;
 using TaskIT.Mapping;
 using TaskIT.Model;
 
@@ -15,6 +16,12 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
                 .Where(fj => fj.WorkerId == workerId)
                 .ToListAsync();
             return finishedJobs;
+        }
+
+        public async Task<List<JobAdvertisement>> GetAllFinishedJobAdvertisementsForWorker(string workerId)
+        {
+            var jobAdvertisements = await context.FinishedJobs.Include(ja => ja.JobAdvertisement).Where(ja => ja.WorkerId == workerId).Select(ja => ja.JobAdvertisement).ToListAsync();
+            return jobAdvertisements;
         }
 
         public async Task<FinishedJob> WorkerEvaluateAsync(string finishedJobId, int workerEvaluation)
@@ -60,6 +67,35 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
                 .Select(fj => fj.WorkerEvaluation ?? 0) 
                 .ToListAsync();
             return finishedJobsPoints;
+        }
+
+        public async Task<FinishedJob> AddNewFinishedJob(string jobAdvertisementId, string workerId, string employerId)
+        {
+            var finishedJob = new FinishedJob
+            {
+                JobAdvertisementId = jobAdvertisementId,
+                WorkerId = workerId,
+                EmployerId = employerId
+            };
+            await context.FinishedJobs.AddAsync(finishedJob);
+            await context.SaveChangesAsync();
+
+            return finishedJob;
+            
+        }
+
+        public async Task<JobAdvertisement> GetJobAdvertisementForEvaluationEmployer(string finishedJobId)
+        {
+            var finishedJob = await context.FinishedJobs
+                    .Include(fj => fj.JobAdvertisement) // Uključi povezani JobAdvertisement
+                    .FirstOrDefaultAsync(fj => fj.Id == finishedJobId);
+
+            if (finishedJob == null)
+            {
+               throw new Exception("Finished job not found");
+            }
+
+            return finishedJob.JobAdvertisement;
         }
     }
    

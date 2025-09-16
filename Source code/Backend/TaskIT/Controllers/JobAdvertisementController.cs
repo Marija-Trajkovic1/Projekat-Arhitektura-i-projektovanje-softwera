@@ -114,7 +114,6 @@ namespace TaskIT.Controllers
         [HttpGet("GetFilteredJobAdvertisements")]
         public async Task<IActionResult> GetFilteredJobAdvertisements(
             [FromQuery] string filterBy,
-            [FromQuery] string? employerId,
             [FromQuery] List<string>? employerIds,
             [FromQuery] int? minSalary,
             [FromQuery] int? maxSalary,
@@ -127,7 +126,7 @@ namespace TaskIT.Controllers
             try
             {
                 var userId = GetUserId();
-                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId,employerIds, minSalary, maxSalary, jobTypes,jobType, city);
+                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, userId,employerIds, minSalary, maxSalary, jobTypes,jobType, city);
                 var allJobAdvertisements = jobAdvertisementRepository.GetAllQueryable();
                 var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)
                         .Skip((page - 1) * pageSize)

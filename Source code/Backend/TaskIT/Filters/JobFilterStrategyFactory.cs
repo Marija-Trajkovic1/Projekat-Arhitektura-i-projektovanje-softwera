@@ -16,7 +16,7 @@ namespace TaskIT.Filters
                 },
 
                 {
-                    "employerList",
+                    "employerlist",
                     (new EmployersListFilterStrategyImpl(), filterValue =>
                          {
                             var list = filterValue as List<string>;
@@ -42,7 +42,7 @@ namespace TaskIT.Filters
                 },
 
                 {
-                    "jobtypeList",
+                    "jobtypelist",
                     (new JobTypesListFilterStrategyImpl(), filterValue =>
                     {
                     var list = filterValue as List<string>;
@@ -68,10 +68,10 @@ namespace TaskIT.Filters
             object filterValue = filterBy.ToLower() switch
             {
                 "employer" => employerId,
-                "employerList"=>employerIds,
+                "employerlist"=>employerIds,
                 "salary" => new Tuple<int, int>(minSalary ?? 0, maxSalary ?? 0),
                 "jobtype" => jobType,
-                "jobtypeList"=>jobTypes,
+                "jobtypelist"=>jobTypes,
                 "city" => city,
                 _ => throw new ArgumentException($"Invalid filter criteria!")
             };

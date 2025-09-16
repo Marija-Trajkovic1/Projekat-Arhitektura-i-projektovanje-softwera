@@ -30,6 +30,21 @@ namespace TaskIT.Controllers
             return Ok(finishedJobsDTO);
         }
 
+        [Authorize(Roles ="WORKER")]
+        [HttpGet("GetFinishedJobAdvertisementsForWorker")]
+        public async Task<IActionResult> GetFinishedJobAdvertisementsForWorker()
+        {
+            var workerId = GetUserId();
+            
+            var fjobAdvertisements = await finishedJobRepository.GetAllFinishedJobAdvertisementsForWorker(workerId);
+            if (fjobAdvertisements != null)
+            {
+                var fjobAdvertisementsResponse = fjobAdvertisements.Select(fja => fja.ToJobAdvertisementDTO());
+                return Ok(fjobAdvertisementsResponse);
+            }
+            return BadRequest("Finished jobs are not found!");
+        }
+
         [Authorize(Roles="Employer")]
         [HttpPost("AddFinishedJob")]
         public async Task<IActionResult> AddFinishedJob([FromBody] CreateFinishedJobRequest createFinishedJob)
@@ -45,15 +60,16 @@ namespace TaskIT.Controllers
             return CreatedAtAction(nameof(FindAllFinishedJobsForWorker), new { workerId = finishedJob.WorkerId }, finishedJob.ToFinishedJobDTO());
         }
 
-        [Authorize(Roles ="Employer")]
-        [HttpPut("WorkerEvaluation")]
+        [Authorize(Roles ="EMPLOYER")]
+        [HttpPut("WorkerEvaluation/{finishedJobId}")]
         public async Task<IActionResult> WorkerEvaluation([FromBody] int workerEvaluation, [FromRoute] string finishedJobId)
         {
             var finishedJob = await finishedJobRepository.WorkerEvaluateAsync(finishedJobId, workerEvaluation);
-           
-            await finishedJobNotificationService.NotifyWorkerEvaluated(finishedJob.WorkerId, finishedJob.JobAdvertisement.Title, workerEvaluation);
+            var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
 
-            return Ok(finishedJob.ToFinishedJobDTO());
+
+            await finishedJobNotificationService.NotifyWorkerEvaluated(finishedJob.WorkerId, finishedJob.JobAdvertisement.Title, workerEvaluation);
+            return Ok(finishedJob.WorkerEvaluation);
         }
 
         [Authorize(Roles = "Worker")]
@@ -76,15 +92,17 @@ namespace TaskIT.Controllers
             return Ok(average);
         }
 
-        [Authorize(Roles = "Worker")]
-        [HttpPut("EmployerEvaluation")]
+        [Authorize(Roles = "WORKER")]
+        [HttpPut("EmployerEvaluation/{finishedJobId}")]
         public async Task<IActionResult> EmployerEvaluation([FromBody] int employerEvaluation, [FromRoute] string finishedJobId)
         {
             var finishedJob = await finishedJobRepository.EmployerEvaluateAsync(finishedJobId, employerEvaluation);
- 
+            var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
+
             await finishedJobNotificationService.NotifyEmployerEvaluated(finishedJob.EmployerId, finishedJob.JobAdvertisement.Title, employerEvaluation);
 
-            return Ok(finishedJob.ToFinishedJobDTO());
+            var response = jobAdvertisement.ToFinishedJobAdvertisementResponseEvaluation(finishedJobId, employerEvaluation);
+            return Ok(response);
         }
 
         [Authorize]

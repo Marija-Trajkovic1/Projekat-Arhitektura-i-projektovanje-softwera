@@ -2,7 +2,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const EmployerFollowing = () => {
+const EmployerFollowing = ({onEmployersChange}) => {
   const { token } = useAuth();
   const [employersList, setEmployersList] = useState([]);
   const [followedEmployers, setFollowedEmployers] = useState([]);
@@ -23,7 +23,9 @@ const EmployerFollowing = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setFollowedEmployers(followedResponse.data.map((e) => String(e.id)) || []);
+        const followed = followedResponse.data.map((e) => String(e.id)) || []
+        setFollowedEmployers(followed);
+        onEmployersChange(followed);
       } catch (error) {
         console.error(
           "Pribavljanje poslodavaca nije uspelo",
@@ -32,7 +34,7 @@ const EmployerFollowing = () => {
       }
     };
     getEmployers();
-  }, []);
+  }, [onEmployersChange]);
 
   const clickOnFollow = async (employerId) => {
     try {
@@ -56,7 +58,9 @@ const EmployerFollowing = () => {
         `https://localhost:7260/UserFollowing/GetFollowedEmployers`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setFollowedEmployers(refreshed.data.map((e) => String(e.id)) || []);
+      const updated =refreshed.data.map((e) => String(e.id)) || [];
+      setFollowedEmployers(updated);
+      onEmployersChange(updated);
     } catch (error) {
       console.error(
         "Neuspelo osvežavanje liste praćenih poslodavaca",

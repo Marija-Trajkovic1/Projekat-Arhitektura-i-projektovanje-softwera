@@ -1,12 +1,19 @@
-const JobAdvertisementForm =({formData, setFormData, onSave, onCancel, isLoading})=>{
-    const inputStyle = "border p-2 w-full mb-2 rounded";
+import { jobTypes } from "../../constants/JobTypes";
+const JobAdvertisementForm = ({
+  formData,
+  setFormData,
+  onSave,
+  onCancel,
+  isLoading,
+}) => {
+  const inputStyle = "border p-2 w-full mb-2 rounded";
 
-    const handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  return(
+  return (
     <>
       <h2 className="text-xl font-bold mb-4">Izmeni oglas</h2>
       <input
@@ -80,14 +87,19 @@ const JobAdvertisementForm =({formData, setFormData, onSave, onCancel, isLoading
         placeholder="Visina naknade u dinarima po satu"
         required
       />
-      <input
-        type="text"
+      <select
         name="jobType"
         value={formData.jobType}
         onChange={handleInputChange}
         className={inputStyle}
-        placeholder="Tip posla"
-      />
+      >
+        <option value="">Izaberi tip posla</option>
+        {jobTypes.map((type) => (
+          <option key={type} value={type}>
+            {type}
+          </option>
+        ))}
+      </select>
 
       <div className="flex gap-2 mt-2">
         <button
@@ -107,6 +119,6 @@ const JobAdvertisementForm =({formData, setFormData, onSave, onCancel, isLoading
       </div>
     </>
   );
-}
+};
 
 export default JobAdvertisementForm;

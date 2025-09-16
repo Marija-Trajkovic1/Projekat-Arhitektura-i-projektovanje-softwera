@@ -5,4 +5,5 @@ export const jobTypes = [
   "Prevoz",
   "Zdravstvo",
   "Obrazovanje",
+  "Čišćenje"
 ];

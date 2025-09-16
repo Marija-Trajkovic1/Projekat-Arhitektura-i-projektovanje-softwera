@@ -2,6 +2,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useCallback } from "react";
 import axios from "axios";
 import JobList from "../../components/Employer/JobList";
+import { jobTypes } from "../../constants/JobTypes";
 
 const ManageJobAds = () => {
   const { token, role } = useAuth();
@@ -23,8 +24,15 @@ const ManageJobAds = () => {
   const refreshJobAds = useCallback(async () => {
     try {
       const response = await axios.get(
-        `https://localhost:7260/JobAdvertisement/GetFilteredJobAdvertisements?filterBy=employer`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `https://localhost:7260/JobAdvertisement/GetFilteredJobAdvertisements`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            filterBy: "employer", // ili "all" ako hoćeš sve oglase
+            page: 1,
+            pageSize: 10,
+          },
+        }
       );
       console.log("API odgovor:", response.data);
       const jobList = response.data.jobAdvList || response.data || [];
@@ -42,7 +50,7 @@ const ManageJobAds = () => {
   };
 
   const handleNewJobSubmit = async (e) => {
-     if(e &&e.preventDefault) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setLoading(true);
     try {
       const response = await axios.post(
@@ -65,7 +73,7 @@ const ManageJobAds = () => {
         jobSalary: "",
         jobType: "",
       });
-      setRefreshTrigger((prev)=>prev+1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error(
         "Greska pri kreiranju oglasa:",
@@ -84,7 +92,9 @@ const ManageJobAds = () => {
   const modalForNewJob = isModalActive && (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Unesite podatke za novi oglas</h2>
+        <h2 className="text-xl font-bold mb-4">
+          Unesite podatke za novi oglas
+        </h2>
         <form onSubmit={handleNewJobSubmit} className="flex flex-col gap-4">
           <input
             type="text"
@@ -158,14 +168,19 @@ const ManageJobAds = () => {
             placeholder="Visina naknade u dinarima po satu"
             required
           />
-          <input
-            type="text"
+          <select
             name="jobType"
             value={formData.jobType}
-            onChange={handleChange}
-            className="border p-2 rounded"
-            placeholder="Tip posla"
-          />
+            onChange={handleInputChange}
+            className={inputStyle}
+          >
+            <option value="">Izaberi tip posla</option>
+            {jobTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
 
           <div className="flex gap-2">
             <button
