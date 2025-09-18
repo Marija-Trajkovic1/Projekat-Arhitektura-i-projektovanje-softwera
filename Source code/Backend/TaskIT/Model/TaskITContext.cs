@@ -27,7 +27,7 @@ namespace TaskIT.Model
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<JobApplication>()
-                .HasKey(ja => new { ja.JobId, ja.WorkerId });
+                .HasKey(ja => ja.Id);
 
             modelBuilder.Entity<JobApplication>()
                 .HasOne(ja => ja.JobAdvertisement)

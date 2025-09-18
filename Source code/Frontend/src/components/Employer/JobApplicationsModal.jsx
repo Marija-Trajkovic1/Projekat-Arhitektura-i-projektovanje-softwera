@@ -1,51 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
-const JobApplicationsModal = ({
-  isOpen,
-  onClose,
-  applications,
-  jobTitle,
-  token,
-}) => {
-  if (!isOpen) return null;
-  const [statusMap, setStatusMap] = useState({});
-  
+const JobApplicationsModal = ({ isOpen, onClose, jobId, jobTitle }) => {
+  const { token } = useAuth();
+  const [applications, setApplications] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loadingIds, setLoadingIds] = useState([]);
 
-  const handleAcceptApplication = async (applicationId) => {
+  const getApplications = async () => {
     try {
-      await axios.put(
-        `https://localhost:7260/JobApplication/AcceptApplicationForJob/${applicationId}`,
+      setLoading(true);
+      const response = await axios.get(
+        `https://localhost:7260/JobApplication/GetJobApplicationsForJobAdd/${jobId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setStatusMap((prev)=>({...prev, [applicationId]:"accepted"}));
+      setApplications(response.data || []);
+    } catch (error) {
+      console.error(
+        "Neuspešno pribavljanje prijava za oglas",
+        error.response?.data || error.response
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    getApplications();
+  }, [isOpen, applications]);
+
+  if (!isOpen) return;
+
+  const handleAcceptApplication = async (applicationId) => {
+    try {
+      setLoadingIds((prev) => [...prev, applicationId]);
+      await axios.put(
+        `https://localhost:7260/JobApplication/AcceptApplicationForJob/${applicationId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("Prihvatili ste prijavu!");
+      await getApplications();
     } catch (error) {
       console.error(
         "Neuspelo prihvatanje prijave korisnika za oglas!",
         error.response?.data || error.response
       );
+    } finally {
+      setLoadingIds((prev) => prev.filter((id)=>id !== applicationId));
     }
   };
 
   const handleRejectApplication = async (applicationId, workerId) => {
     try {
+      setLoadingIds((prev) => [...prev, applicationId]);
       await axios.put(
-        `https://localhost:7260/JobApplication/DeclineApplicationForJobByEmployer/${applicationId}`,
-        {workerId},
+        `https://localhost:7260/JobApplication/DeclineApplicationForJobByEmployer?jobApplicationId=${applicationId}&workerId=${workerId}`,
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setStatusMap((prev)=>({...prev, [applicationId]:"declined"}))
+      alert("Odbili ste prijavu!");
+      await getApplications();
     } catch (error) {
       console.error(
         "Neuspelo odbijanje prijave korisnika za oglas!",
         error.response?.data || error.response
       );
+    } finally {
+      setLoadingIds((prev) => prev.filter((id) => id !== applicationId));
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex justify-center items-center z-50 pointer-events-none">
@@ -56,42 +88,48 @@ const JobApplicationsModal = ({
           <p className="text-gray-600">Jos uvek nema prijava za ovaj oglas.</p>
         ) : (
           applications.map((app) => {
-            const status =statusMap[app.id];
-            return(
-            <div
-              key={app.id}
-              className="border rounded-lg p-3 mb-2 flex justify-between items-center shadow-sm"
-            >
-              <p className="text-sm">
-                <strong>{app.workerUserName}</strong> se prijavio za vaš oglas.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleAcceptApplication(app.id)}
-                  className={`px-2 py-1 rounded text-xs text-white ${
-                      status === "accepted"
-                        ? "bg-green-400 cursor-not-allowed"
-                        : "bg-green-500 hover:bg-green-600"
-                    }`}
-                    disabled={status==="accepted"}
-                >
-                  {status==="accepted" ? "Prihvaceno" : "Prihvati"}
-                </button>
-                <button
-                  onClick={() => onReject(app.id, app.workerId)}
-                  className={`px-2 py-1 rounded text-xs text-white ${
-                      status === "declined"
-                        ? "bg-red-400 cursor-not-allowed"
-                        : "bg-red-500 hover:bg-red-600"
-                    }`}
-                    disabled={status === "declined"}
-                >
-                  {status==="declined" ? "Odbijeno" : "Odbij"}
-                </button>
+            const isLoading = loadingIds.includes(jobId.id);
+            return (
+              <div
+                key={app.id}
+                className="border rounded-lg p-3 mb-2 flex justify-between items-center shadow-sm"
+              >
+                <p className="text-sm">
+                  <strong>{app.workerUserName}</strong> se prijavio za vaš
+                  oglas.
+                </p>
+                <div className="flex gap-2">
+                  {app.isAccepted ? (
+                    <span className="text-greeen-600 font-semibold text-sm">
+                      Prihvaćeno
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleAcceptApplication(app.id)}
+                        disabled={isLoading}
+                        className="px-2 py--1 rounded text-xs text-white bg-green-500 hover:bg-green-600"
+                      >
+                        Prihvati
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleRejectApplication(app.id, app.workerId)
+                        }
+                        className={`px-2 py-1 rounded text-xs text-white bg-red-500 hover:bg-red-600"
+                        }`}
+                      >
+                        Odbij
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          )}))}
-        
+            );
+          })
+        )}
+
         <button
           onClick={onClose}
           className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600"

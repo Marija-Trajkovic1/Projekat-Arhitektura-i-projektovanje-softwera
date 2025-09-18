@@ -9,7 +9,6 @@ const JobList = ({ refreshJobAds, refreshTrigger, setRefreshTrigger }) => {
     setLoading(true);
     try {
       const jobsList = await refreshJobAds();
-      console.log("dohvaceni poslovi: ", jobsList);
       setJobAdvList(jobsList || []);
     } catch (error) {
       console.error(

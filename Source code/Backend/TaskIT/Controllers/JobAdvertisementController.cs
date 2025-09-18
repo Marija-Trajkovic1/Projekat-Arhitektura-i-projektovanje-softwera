@@ -120,20 +120,37 @@ namespace TaskIT.Controllers
             [FromQuery] List<string>? jobTypes,
             [FromQuery] string? jobType,
             [FromQuery] string? city,
+            [FromQuery] bool excludeOwn =false,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                var userId = GetUserId();
-                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, userId,employerIds, minSalary, maxSalary, jobTypes,jobType, city);
+                var employerId = GetUserId();
+                var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId,employerIds, minSalary, maxSalary, jobTypes,jobType, city);
                 var allJobAdvertisements = jobAdvertisementRepository.GetAllQueryable();
-                var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToListAsync();
-                var filteredJobAdvertisementsDTO = filteredJobAdvertisements.Select(j => j.ToJobAdvertisementDTO());
-                return Ok(filteredJobAdvertisementsDTO);
+                if (excludeOwn)
+                {
+                    var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)
+                        .Where(j => j.MyEmployerId != employerId)
+                       .Skip((page - 1) * pageSize)
+                       .Take(pageSize)
+                       .ToListAsync();
+
+                    var filteredJobAdvertisementsDTO = filteredJobAdvertisements.Select(j => j.ToJobAdvertisementDTO());
+                    return Ok(filteredJobAdvertisementsDTO);
+                }
+                else
+                {
+                    var filteredJobAdvertisements = await strategy.Filter(allJobAdvertisements, filterValue)
+                       .Skip((page - 1) * pageSize)
+                       .Take(pageSize)
+                       .ToListAsync();
+
+                    var filteredJobAdvertisementsDTO = filteredJobAdvertisements.Select(j => j.ToJobAdvertisementDTO());
+                    return Ok(filteredJobAdvertisementsDTO);
+                }
+               
             }
             catch (ArgumentException ex)
             {

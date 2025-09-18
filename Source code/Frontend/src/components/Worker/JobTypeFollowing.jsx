@@ -20,7 +20,7 @@ const JobTypeFollowing = ({onJobTypeChange}) => {
         setFollowedJobTypes(response.data || []);
         onJobTypeChange(types);
       } catch (error) {
-        console.log(
+        console.error(
           "Neuspelo dohvatanje tipova koje pratite!",
           error.response?.data || error.response
         );

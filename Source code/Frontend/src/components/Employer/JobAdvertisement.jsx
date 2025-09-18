@@ -9,7 +9,6 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
   const { token } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [applicationList, setApplicationList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -25,14 +24,9 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
   });
 
   const handleDeleteJobAdv = async () => {
-    if (
-      !window.confirm("Da li ste sigurni da želite da obrišete ovaj oglas?")
-    ) {
-      return;
-    }
+    if (!window.confirm("Da li ste sigurni da želite da obrišete ovaj oglas?")) return;
 
     try {
-      const id = ad.id;
       await axios.delete(
         `https://localhost:7260/JobAdvertisement/DeleteJobAdvertisement/${id}`,
         {
@@ -52,15 +46,13 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
   const handleUpdateJobAdvertisement = async () => {
     setIsLoading(true);
     try {
-      const id = ad.id;
-      const response = await axios.put(
+      await axios.put(
         `https://localhost:7260/JobAdvertisement/UpdateJobAdvertisement/${id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      ad = response.data;
       alert("Uspešno ste ažurirali oglas!");
       setEditMode(false);
       setRefreshTrigger((prev) => prev + 1);
@@ -75,26 +67,10 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
     }
   };
 
-  const handleCheckApplications = async () => {
-    try {
-      const id = ad.id;
-      const response = await axios.get(
-        `https://localhost:7260/JobApplication/GetJobApplicationsForJobAdd/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setApplicationList(response.data || []);
+  const handleCheckApplications = () => {
       setIsModalOpen(true);
-    } catch (error) {
-      console.error(
-        "Učitavanje liste prijava za oglas nije uspelo!",
-        error.response?.data || error.response
-      );
     }
-  };
 
-  
   return (
     <div className="w-80 p-4 bg-white rounded-lg shadow-md border border-gray-200">
       {editMode ? (
@@ -117,9 +93,8 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
       <JobApplicationsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        applications={applicationList}
+        jobId={ad.id}
         jobTitle={ad.title}
-        token ={token}
       />
     </div>
   );

@@ -62,5 +62,6 @@ namespace TaskIT.Mapping
                 JobType = jobAdvertisementDTO.JobType
             };
         }
+      
     }
 }

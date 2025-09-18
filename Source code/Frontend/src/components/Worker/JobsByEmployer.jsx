@@ -6,16 +6,17 @@ import qs from "qs";
 const JobsByEmployer = ({ employerIds }) => {
   const { token } = useAuth();
   const [jobAds, setJobAds] = useState([]);
+  const [loading, setLoading]=useState(false);
   const [loadingIds, setLoadingIds] = useState([]);
 
-  useEffect(() => {
+  const getJobAds = async()=> {
     if (!employerIds || employerIds.length === 0) {
       setJobAds([]);
       return;
     }
 
-    const getJobAds = async () => {
       try {
+        setLoading(true);
         const response = await axios.get(
           `https://localhost:7260/JobAdvertisement/GetFilteredJobAdvertisements`,
           {
@@ -23,6 +24,7 @@ const JobsByEmployer = ({ employerIds }) => {
             params: {
               filterBy: "employerlist",
               employerIds: employerIds.filter((id) => id),
+              excludeOwn:true,
               page: 1,
               pageSize: 10,
             },
@@ -30,60 +32,36 @@ const JobsByEmployer = ({ employerIds }) => {
               qs.stringify(params, { arrayFormat: "repeat" }),
           }
         );
-        console.log("GetFilteredJobAdvertisements response:", response.data);
+      
         setJobAds(response.data || []);
       } catch (error) {
         console.error(
           "Neuspelo pribavljanje oglasa prema poslodavcu",
           error.response?.data || error.response
         );
+      }finally{
+        setLoading(false)
       }
     };
 
-    getJobAds();
-  }, [employerIds, token]);
+    useEffect(()=>{
+      getJobAds();
+    }, [employerIds, token])
+
 
   const applyToJob = async (jobId) => {
     try {
       setLoadingIds((prev) => [...prev, jobId]);
-      const response = await axios.put(
+      await axios.put(
         `https://localhost:7260/JobApplication/SendApplayForJob/${jobId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Apply response:", response.data);
-      setJobAds((prev) =>
-        prev.map((job) => 
-          job.id === jobId ? {...job, isAvailable:false} : job)
-      );
       alert("Uspešno ste se prijavili na oglas!");
+      await getJobAds();
     } catch (error) {
       console.error(
         "Neuspelo prijavljivanje na oglas!",
-        error.response?.data || error.response
-      );
-    } finally {
-      setLoadingIds((prev) => prev.filter((id) => id !== jobId));
-    }
-  };
-
-  const declineApplication = async (jobId) => {
-    try {
-      setLoadingIds((prev) => [...prev, jobId]);
-      const response = await axios.put(
-        `https://localhost:7260/JobApplication/DeclineApplicationForJobByWorker/${jobId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log("Decline response:", response.data);
-      setJobAds((prev) =>
-        prev.map((job) => 
-          job.id === jobId ? {...job, isAvailable: true} : job)
-      );
-      alert("Prijava je otkazana!");
-    } catch (error) {
-      console.error(
-        "Neuspešno otkazivanje prijave!",
         error.response?.data || error.response
       );
     } finally {
@@ -95,14 +73,17 @@ const JobsByEmployer = ({ employerIds }) => {
     return <p className="text-gray-500">Niste odabrali nijednog poslodavca.</p>;
   }
 
+  if(jobAds.length ===0){
+    return(
+      <p className="text-gray-500">
+        Zapratite posodavce da biste videli dostupne oglase!
+      </p>
+    )
+  }
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
-      {jobAds.length === 0 ? (
-        <p className="text-gray-500">
-          Zapratite poslodavce da biste pregledali oglase!
-        </p>
-      ) : (
-        jobAds.map((job) => {
+        {jobAds.map((job) => {
           const isLoading = loadingIds.includes(job.id);
           return (
             <div
@@ -124,30 +105,21 @@ const JobsByEmployer = ({ employerIds }) => {
               </p>
 
               <button
-                onClick={() =>
-                  job.isAvailable
-                    ? applyToJob(job.id)
-                    : declineApplication(job.id)
-                }
+                onClick={() =>applyToJob(job.id)}
                 disabled={isLoading}
                 className={`mt-3 w-full px-4 py-2 rounded text-white font-semibold transition-colors ${
                   isLoading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : job.isAvailable
-                    ? "bg-blue-500 hover:bg-blue-600"
-                    : "bg-red-500 hover:bg-red-600"
+                    : "bg-blue-500 hover:bg-blue-600"
                 }`}
               >
                 {isLoading
                   ? "Učitavanje"
-                  : job.isAvailable
-                  ? "Prijavi se"
-                  : "Otkaži prijavu"}
+                  : "Prijavi se"}
               </button>
             </div>
           );
-        })
-      )}
+        })}
     </div>
   );
 };

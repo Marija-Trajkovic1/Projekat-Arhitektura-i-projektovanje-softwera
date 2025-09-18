@@ -62,9 +62,9 @@ namespace TaskIT.Controllers
         {
             var workerId = GetUserId();
 
-            var jobApplication = await jobApplicationRepository.GetExistingJobApplication(jobAdvertisementId, workerId);
-            if (jobApplication != null)
-                return BadRequest($"Job Advertisement with ID {jobAdvertisementId} exist!");
+            var jobApplicationExist = await jobApplicationRepository.GetExistingJobApplicationForWorker(jobAdvertisementId, workerId);
+            if (jobApplicationExist != null)
+                return BadRequest($"Job Application for that jobAdvertisement exist!");
             var newApplication = new JobApplication
             {
                 JobId = jobAdvertisementId,
@@ -72,24 +72,29 @@ namespace TaskIT.Controllers
                 IsAccepted = false
             };
             
-            await jobApplicationRepository.CreateAsync(newApplication);
+            var savedApplication = await jobApplicationRepository.CreateAsync(newApplication);
             var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
             jobAdvertisement.IsAvailable = false;
-            var updatedJobAdv=await jobAdvertisementRepository.UpdateAsync(jobAdvertisement.Id, jobAdvertisement);
+            if(await jobAdvertisementRepository.UpdateAsync(jobAdvertisement.Id, jobAdvertisement) != null)
+            {
+                var employerId = jobAdvertisement.MyEmployerId;
 
-            var employerId = jobAdvertisement.MyEmployerId;
+                await jobApplicationNotificationService.NotifyApplicationSubmitted(employerId, workerId, jobAdvertisementId, jobAdvertisement.Title);
+                return Ok(savedApplication.ToJobApplicationDTO());
+            }
 
-            await jobApplicationNotificationService.NotifyApplicationSubmitted(employerId, workerId, jobAdvertisementId, jobAdvertisement.Title);
-            return Ok(updatedJobAdv);
+            return BadRequest("Job Advertisement status is not updated!");
         }
 
         [Authorize(Roles = "EMPLOYER")]
-        [HttpPut("DeclineApplicationForJobByEmployer/{jobApplicationId}")]
-        public async Task<IActionResult> DeclineaApplicationForJobByEmployer([FromRoute] string jobApplicationId, [FromBody] string workerId)
+        [HttpPut("DeclineApplicationForJobByEmployer")]
+        public async Task<IActionResult> DeclineaApplicationForJobByEmployer([FromQuery] string jobApplicationId, [FromQuery] string workerId)
         {
-            var jobApplicationAccepted = await jobApplicationRepository.GetAcceptedJobApplication(jobApplicationId);
-            if (jobApplicationAccepted.WorkerId!=workerId || jobApplicationAccepted.IsAccepted == true)
-                return BadRequest("This job advertisement decline acception is not possible.");
+            var jobApplicationAccepted = await jobApplicationRepository.GetJobApplication(jobApplicationId);
+            
+            if (jobApplicationAccepted.WorkerId!=workerId)
+                return BadRequest("This job advertisement is not yours.");
+
             var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobApplicationAccepted.JobId);
 
             await jobApplicationRepository.DeleteAsync(jobApplicationAccepted.Id);
@@ -108,12 +113,12 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> DeclineaApplicationForJobByWorker([FromRoute] string jobAdvertisementId)
         {
             var workerId = GetUserId();
-            var jobApplication = await jobApplicationRepository.GetExistingJobApplication(jobAdvertisementId, workerId);
+            var jobApplication = await jobApplicationRepository.GetExistingJobApplicationForWorker(jobAdvertisementId, workerId);
             if (jobApplication == null)
             {
                 return NotFound("You are not applied for this job advertisement!");
             }
-            Console.WriteLine("ID pre brisanja oglasa: ", jobApplication.Id);
+            Console.WriteLine("ID before job application deletion: ", jobApplication.Id);
             var deleted = await jobApplicationRepository.DeleteJobApplication(jobApplication);
             if (deleted==null)
                 return NotFound("JobApplication not found");
@@ -140,24 +145,27 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> AcceptApplicationForJob([FromRoute] string jobApplicationId)
         {
             var employerId = GetUserId();
-            var jobApplicationAccepted = await jobApplicationRepository.GetAcceptedJobApplication(jobApplicationId);
-            if (jobApplicationAccepted.IsAccepted ==true)
+            var employer = await userRepository.GetAsync(employerId);
+            var jobApplicationAccepted = await jobApplicationRepository.GetJobApplication(jobApplicationId);
+
+            if (jobApplicationAccepted == null)
+                return NotFound("Job application not found.");
+            if (jobApplicationAccepted.IsAccepted == true)
                 return BadRequest("This job advertisement application is already accepted.");
 
             var jobAdvertisement = await jobAdvertisementRepository.GetAsync(jobApplicationAccepted.JobId);
-
-            jobAdvertisement.IsAvailable = false;
             jobApplicationAccepted.IsAccepted = true;
             var workerId=jobApplicationAccepted.WorkerId;
 
-            await jobAdvertisementRepository.UpdateAsync(jobApplicationAccepted.JobId, jobAdvertisement);
             var acceptedJobApplication = await jobApplicationRepository.UpdateAsync(jobApplicationAccepted.Id, jobApplicationAccepted);
 
-            await finishedJobRepository.AddNewFinishedJob(jobAdvertisement.Id, workerId, employerId);
+            if (acceptedJobApplication == null) return BadRequest("Accepting application not succedded!");
+
+            await finishedJobRepository.AddNewFinishedJob(jobApplicationAccepted.JobId, workerId, employerId);
 
             await unitOfWork.CompleteAsync();
 
-            await finishedJobNotificationService.NotifyAccepted(workerId, jobApplicationAccepted.JobId, jobAdvertisement.Title, jobAdvertisement.MyEmployer.Name);
+            await finishedJobNotificationService.NotifyAccepted(workerId, jobApplicationAccepted.JobId, jobAdvertisement.Title, employer.Name);
 
             return Ok(acceptedJobApplication);
         }

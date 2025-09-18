@@ -9,7 +9,6 @@ function Login() {
     password: "",
   });
   const [error, setError] = useState(null);
-
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -27,14 +26,9 @@ function Login() {
         "https://localhost:7260/UserAuthentication/Login",
         loginCredentials
       );
-
-      console.log("API response Login:", response.data);
       const { token, userResponse, role } = response.data;
-      console.log("Podaci za login:", {token, userResponse, role});
-      
       const normalizedRole = role.toUpperCase();
       login(userResponse, token, normalizedRole);
-      console.log("Uspesan login, preusmeravanje na profil");
       navigate("/profile");
     } catch (err) {
       console.log("Grska pri loginu:", err);

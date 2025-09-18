@@ -24,12 +24,13 @@ const AvailableJobs=({jobTypes, employerIds})=>{
                         Poslodavci
                     </button>
                 </div>
-
+                
                 {activeTab==="type" ? (
                     <JobsByType jobTypes={jobTypes} />
                 ):(
                     <JobsByEmployer employerIds={employerIds} />
                 )}
+                
 
             </div>
         </div>

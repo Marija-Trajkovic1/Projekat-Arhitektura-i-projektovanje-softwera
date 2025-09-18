@@ -85,7 +85,6 @@ const Profile = () => {
   const handleRoleChange = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log("Starting role change for current role:", role);
       const currentRole = role;
       const response = await axios.post(
         `https://localhost:7260/UserAuthentication/ChangeRole?currentRole=${currentRole}`,
@@ -94,7 +93,6 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Role change response:", response.data);
       updateAuth({
         token: response.data.token,
         user: response.data.userResponse,
@@ -108,8 +106,6 @@ const Profile = () => {
         city:  response.data.userResponse.city|| "",
         homeNumber:  response.data.userResponse.homeNumber || "",
       });
-      alert("Sada ste ulogovani kao "+response.data.role.toLowerCase()+"!");
-      navigate(0);
     } catch (error) {
       console.error(
         "Greška pri promeni role:",
@@ -125,8 +121,8 @@ const Profile = () => {
     }
   }, [role, token, updateAuth, navigate, logout, isLoading]);
 
-  if (loading) return <p>Profil se ucitava...</p>;
-  if (!profileData) return <p>Profil nije pronadjen!</p>;
+  if (loading) return <p>Profil se učitava...</p>;
+  if (!profileData) return <p>Profil nije pronađen!</p>;
 
   const inputStyle = "border p-2 w-full mb-2 rounded";
 
@@ -226,14 +222,14 @@ const Profile = () => {
 
       <button
         onClick={() => setEditMode(true)}
-        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2"
       >
         Izmenite profil
       </button>
 
       <button
         onClick={handleRoleChange}
-        className="mt-2 bg-white-400 text-black px-4 py-2 rounded hover: bg-blue-600 ml-2"
+        className="mt-2 bg-blue-400 text-white px-4 py-2 rounded hover: bg-blue-600 ml-2"
         disabled={isLoading}
       >
        {isLoading ? "Obrada...":role==="WORKER"? "Postani poslodavac" : "Postani radnik"}

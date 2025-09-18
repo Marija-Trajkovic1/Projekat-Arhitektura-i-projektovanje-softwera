@@ -18,10 +18,13 @@ namespace TaskIT.Repository.FinishedJobRepositoryF
             return finishedJobs;
         }
 
-        public async Task<List<JobAdvertisement>> GetAllFinishedJobAdvertisementsForWorker(string workerId)
+        public async Task<List<FinishedJob>> GetAllFinishedJobAdvertisementsForWorker(string workerId)
         {
-            var jobAdvertisements = await context.FinishedJobs.Include(ja => ja.JobAdvertisement).Where(ja => ja.WorkerId == workerId).Select(ja => ja.JobAdvertisement).ToListAsync();
-            return jobAdvertisements;
+            var finishedJob = await context.FinishedJobs
+                .Include(ja => ja.JobAdvertisement)
+                .Where(ja => ja.WorkerId == workerId)
+                .ToListAsync();
+            return finishedJob;
         }
 
         public async Task<FinishedJob> WorkerEvaluateAsync(string finishedJobId, int workerEvaluation)

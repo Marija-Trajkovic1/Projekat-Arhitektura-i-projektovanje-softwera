@@ -9,5 +9,6 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
         public Task<JobAdvertisement> UpdateJobAdvertisementAsync(string jobAdvertisementId, UpdateJobAdvertisementRequest jobAdvertisement);
         public Task<List<JobAdvertisement>> GetAllUserPostedJobsAsync(string employerId);
         public Task<List<JobAdvertisement>> GetAvailableJobAdvertisementsAsync(string employerId);
+
     }
 }

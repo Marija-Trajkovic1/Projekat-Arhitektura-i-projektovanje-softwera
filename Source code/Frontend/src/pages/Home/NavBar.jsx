@@ -8,7 +8,6 @@ const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log("user: ", user, " role:", role);
   const handleLogout = () => {
     logout();
     navigate("/");

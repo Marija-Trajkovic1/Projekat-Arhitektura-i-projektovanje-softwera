@@ -8,6 +8,8 @@ using TaskIT.Repository.FinishedJobRepositoryF;
 
 namespace TaskIT.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class FinishedJobController : Controller
     {
         private readonly FinishedJobRepository finishedJobRepository;
@@ -39,7 +41,7 @@ namespace TaskIT.Controllers
             var fjobAdvertisements = await finishedJobRepository.GetAllFinishedJobAdvertisementsForWorker(workerId);
             if (fjobAdvertisements != null)
             {
-                var fjobAdvertisementsResponse = fjobAdvertisements.Select(fja => fja.ToJobAdvertisementDTO());
+                var fjobAdvertisementsResponse = fjobAdvertisements.Select(fja => fja.ToFinishedJobForWorkerResponse());
                 return Ok(fjobAdvertisementsResponse);
             }
             return BadRequest("Finished jobs are not found!");
@@ -93,11 +95,13 @@ namespace TaskIT.Controllers
         }
 
         [Authorize(Roles = "WORKER")]
-        [HttpPut("EmployerEvaluation/{finishedJobId}")]
-        public async Task<IActionResult> EmployerEvaluation([FromBody] int employerEvaluation, [FromRoute] string finishedJobId)
+        [HttpPut("EmployerEvaluation")]
+        public async Task<IActionResult> EmployerEvaluation([FromQuery] string finishedJobId, [FromQuery] int employerEvaluation)
         {
             var finishedJob = await finishedJobRepository.EmployerEvaluateAsync(finishedJobId, employerEvaluation);
+            if (finishedJob == null) return BadRequest("Finished job not found!");
             var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
+            if (jobAdvertisement == null) return BadRequest("Job advertisement not found!");
 
             await finishedJobNotificationService.NotifyEmployerEvaluated(finishedJob.EmployerId, finishedJob.JobAdvertisement.Title, employerEvaluation);
 

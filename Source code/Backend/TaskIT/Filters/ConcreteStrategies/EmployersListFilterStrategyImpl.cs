@@ -8,7 +8,7 @@ namespace TaskIT.Filters.ConcreteStrategies
             var employerIds = filterValue as List<string>;
             if (employerIds == null || !employerIds.Any()) return jobAdvertisements;
 
-            return jobAdvertisements.Where(ad => employerIds.Contains(ad.MyEmployerId));
+            return jobAdvertisements.Where(ad => employerIds.Contains(ad.MyEmployerId) && ad.IsAvailable==true);
         }
     }
 }

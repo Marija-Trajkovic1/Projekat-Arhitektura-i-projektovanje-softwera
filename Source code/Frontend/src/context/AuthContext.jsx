@@ -5,8 +5,8 @@ const AuthContext = createContext({});
 
 export default function AuthProvider ({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [role, setRole] = useState(localStorage.getItem("role") || null);
+  const [token, setToken] = useState(sessionStorage.getItem("token") || null);
+  const [role, setRole] = useState(sessionStorage.getItem("role") || null);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -14,17 +14,17 @@ export default function AuthProvider ({ children }) {
     setToken(token);
     setUser(user);
     setRole(role);
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('role', role);
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('user', JSON.stringify(user));
+    sessionStorage.setItem('role', role);
   }
 
   useEffect(() => {
     const validateToken = async () => {
       if(isLoggingOut) return;
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-    const storedRole = localStorage.getItem("role");
+    const storedUser = sessionStorage.getItem("user");
+    const storedToken = sessionStorage.getItem("token");
+    const storedRole = sessionStorage.getItem("role");
 
     if (storedToken && storedUser && storedRole) {
       try {
@@ -54,9 +54,9 @@ export default function AuthProvider ({ children }) {
     setToken(jwtToken);
     setRole(userRole.toUpperCase());
 
-    localStorage.setItem("token", jwtToken);
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("role", userRole.toUpperCase());
+    sessionStorage.setItem("token", jwtToken);
+    sessionStorage.setItem("user", JSON.stringify(userData));
+    sessionStorage.setItem("role", userRole.toUpperCase());
   };
 
   const logout = () => {
@@ -65,9 +65,9 @@ export default function AuthProvider ({ children }) {
     setToken(null);
     setRole(null);
 
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("role");
   };
 
   return (

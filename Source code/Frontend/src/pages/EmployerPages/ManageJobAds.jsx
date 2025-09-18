@@ -34,9 +34,7 @@ const ManageJobAds = () => {
           },
         }
       );
-      console.log("API odgovor:", response.data);
       const jobList = response.data.jobAdvList || response.data || [];
-      console.log("Parsirana lista", jobList);
       return jobList;
     } catch (error) {
       console.error("Greska pri osvezavanju poslova!", error);
@@ -53,7 +51,7 @@ const ManageJobAds = () => {
     if (e && e.preventDefault) e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(
+      await axios.post(
         `https://localhost:7260/JobAdvertisement/AddNewJobAdvertisement`,
         formData,
         {
@@ -171,8 +169,8 @@ const ManageJobAds = () => {
           <select
             name="jobType"
             value={formData.jobType}
-            onChange={handleInputChange}
-            className={inputStyle}
+            onChange={handleChange}
+            className="border p-2 rounded"
           >
             <option value="">Izaberi tip posla</option>
             {jobTypes.map((type) => (

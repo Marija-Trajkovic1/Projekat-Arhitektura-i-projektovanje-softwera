@@ -32,7 +32,7 @@ namespace TaskIT.Repository.JobApplicationRepositoryF
             return jobApplications;
         }
 
-        public async Task<JobApplication> GetExistingJobApplication(string jobAdvertisementId, string workerId)
+        public async Task<JobApplication> GetExistingJobApplicationForWorker(string jobAdvertisementId, string workerId)
         {
             var jobApplication = await context.JobApplications.FirstOrDefaultAsync(ja => ja.JobId == jobAdvertisementId && ja.WorkerId == workerId);
             return jobApplication;
@@ -40,8 +40,14 @@ namespace TaskIT.Repository.JobApplicationRepositoryF
 
         public async Task<List<JobAdvertisement>> GetJobAdvertisementForWorker(string workerId)
         {
-            var jobAdvertisements = await context.JobApplications.Include(ja => ja.JobAdvertisement).Where(ja => ja.WorkerId == workerId).Select(ja => ja.JobAdvertisement).ToListAsync();
+            var jobAdvertisements = await context.JobApplications.Include(ja => ja.JobAdvertisement).Where(ja => ja.WorkerId == workerId && ja.IsAccepted==false).Select(ja => ja.JobAdvertisement).ToListAsync();
             return jobAdvertisements;
+        }
+
+        public async Task<JobApplication> GetJobApplication(string jobApplicationId)
+        {
+            var jobApplication = await context.JobApplications.FirstOrDefaultAsync(ja => ja.Id == jobApplicationId);
+            return jobApplication;
         }
     }
 }

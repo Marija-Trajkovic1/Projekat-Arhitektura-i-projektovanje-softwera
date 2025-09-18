@@ -50,5 +50,26 @@ namespace TaskIT.Mapping
             };
 
         }
+        public static FinishedJobWithAdvertisementResponse ToFinishedJobForWorkerResponse(this FinishedJob finishedJobModel)
+        {
+            if (finishedJobModel == null) return null;
+            return new FinishedJobWithAdvertisementResponse
+            {
+                FinishedJobId = finishedJobModel.Id,
+                EmployerEvaluation = finishedJobModel.EmployerEvaluation.GetValueOrDefault(),
+                JobAdvertisementId = finishedJobModel.JobAdvertisementId,
+                Title = finishedJobModel.JobAdvertisement.Title,
+                ShortDescription = finishedJobModel.JobAdvertisement.ShortDescription,
+                City = finishedJobModel.JobAdvertisement.City,
+                Street = finishedJobModel.JobAdvertisement.Street,
+                HomeNumber = finishedJobModel.JobAdvertisement.HomeNumber,
+                DateOfExecution = finishedJobModel.JobAdvertisement.DateOfExecution,
+                WorkDuration = finishedJobModel.JobAdvertisement.WorkDuration,
+                IsAvailable = finishedJobModel.JobAdvertisement.IsAvailable,
+                JobSalary = finishedJobModel.JobAdvertisement.JobSalary,
+                JobType = finishedJobModel.JobAdvertisement.MyEmployerId
+
+            };
+        }
     }
 }
