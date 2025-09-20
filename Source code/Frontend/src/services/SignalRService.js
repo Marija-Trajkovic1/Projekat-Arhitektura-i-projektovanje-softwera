@@ -8,7 +8,7 @@ class SignalRService {
   startConnection = async (accessToken) => {
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl("http://localhost:7260/taskitHub", {
+        .withUrl("https://localhost:7260/taskItHub", {
           accessTokenFactory: () => accessToken,
         })
         .configureLogging(LogLevel.Information)

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TaskIT.Communication.NotificationServices;
+using TaskIT.Constants;
 using TaskIT.DTOs.FinishedJobDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
@@ -10,7 +10,7 @@ namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FinishedJobController : Controller
+    public class FinishedJobController : ControllerBase
     {
         private readonly FinishedJobRepository finishedJobRepository;
         private readonly FinishedJobNotificationService finishedJobNotificationService;
@@ -23,7 +23,7 @@ namespace TaskIT.Controllers
         [HttpGet("FindAllFinishedJobsForWorker")]
         public async Task<IActionResult> FindAllFinishedJobsForWorker()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var finishedJobs = await finishedJobRepository.GetAllFinishedJobsByWorkerAsync(workerId);
             if (finishedJobs == null)
                 return NotFound("No finished jobs found for the specified worker.");
@@ -36,7 +36,7 @@ namespace TaskIT.Controllers
         [HttpGet("GetFinishedJobAdvertisementsForWorker")]
         public async Task<IActionResult> GetFinishedJobAdvertisementsForWorker()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             
             var fjobAdvertisements = await finishedJobRepository.GetAllFinishedJobAdvertisementsForWorker(workerId);
             if (fjobAdvertisements != null)
@@ -78,7 +78,7 @@ namespace TaskIT.Controllers
         [HttpGet("CountAverageForWorker")]
         public async Task<IActionResult> CountAverageForWorker()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var points = await finishedJobRepository.GetAllEvaluationsOfWorkerAsync(workerId);
             var average = points.Count == 0 ? 0 : points.Average();
             return Ok(average);
@@ -88,7 +88,7 @@ namespace TaskIT.Controllers
         [HttpGet("CountAverageForEmployer")]
         public async Task<IActionResult> CountAverageForEmployer()
         {
-            var employerId = GetUserId();
+            var employerId = User.GetUserId();
             var points = await finishedJobRepository.GetAllEvaluationsOfWorkerAsync(employerId);
             var average = points.Count == 0 ? 0 : points.Average();
             return Ok(average);
@@ -116,9 +116,5 @@ namespace TaskIT.Controllers
             await finishedJobRepository.DeleteAsync(finishedJobId);
             return NoContent();
         }
-
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
-        
     }
 }

@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using TaskIT.DTOs.WorkerJobTypeDTOs;
-using TaskIT.Mapping;
+using TaskIT.Constants;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
 
 namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WorkerJobTypeFollowingController:Controller
+    public class WorkerJobTypeFollowingController:ControllerBase
     {
         private readonly WorkerJobTypeFollowingRepository workerJobTypeFollowingRepository;
 
@@ -22,7 +20,7 @@ namespace TaskIT.Controllers
         [HttpPost("AddNewFollowing/{jobType}")]
         public async Task<IActionResult> AddNewFollowing([FromRoute]string jobType)
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var existingFollowing = await workerJobTypeFollowingRepository.GetAsyncByWorkerAndType(workerId, jobType);
             if (existingFollowing == null)
             {
@@ -51,7 +49,7 @@ namespace TaskIT.Controllers
         [HttpGet("GetTypesForWorker")]
         public async Task<IActionResult> GetTypesForWorker()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var followingTypes = await workerJobTypeFollowingRepository.GetFollowedAsync(workerId);
             return Ok(followingTypes);
         }
@@ -60,15 +58,11 @@ namespace TaskIT.Controllers
         [HttpDelete("DeleteFollowing/{jobType}")]
         public async Task<IActionResult> DeleteFollowing([FromRoute]string jobType)
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var following = await workerJobTypeFollowingRepository.GetAsyncByWorkerAndType(workerId, jobType);
             if (following == null) return BadRequest("Following not exist!");
             await workerJobTypeFollowingRepository.DeleteAsync(following.Id);
             return Ok();
         }
-
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
-
     }
 }

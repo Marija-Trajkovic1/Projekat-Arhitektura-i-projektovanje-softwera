@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TaskIT.Communication.NotificationServices;
+using TaskIT.Constants;
 using TaskIT.Mapping;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
@@ -10,7 +10,7 @@ namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserFollowingController : Controller
+    public class UserFollowingController : ControllerBase
     {
         private readonly UserFollowingRepository userFollowingRepository;
         private readonly UserRepository userRepository;
@@ -27,7 +27,7 @@ namespace TaskIT.Controllers
         [HttpPost("NewFollowing/{employerId}")]
         public async Task<IActionResult> NewFollowing([FromRoute] string employerId)
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             Console.WriteLine("Pocetak metode: ", workerId.ToString(), employerId.ToString());
             var workerExist = await userRepository.EntityExist(workerId);
             var employerExist = await userRepository.EntityExist(employerId);
@@ -45,7 +45,7 @@ namespace TaskIT.Controllers
                 Console.WriteLine("After saving:", createdFollowing.ToString());
 
                 var worker = await userRepository.GetAsync(workerId);
-                await followingNotificationService.NotifyEmployerFollowed(employerId, worker.Name);
+                await followingNotificationService.NotifyEmployerFollowed(employerId, worker.UserName);
                 return Ok(createdFollowing);
             }
             return BadRequest("This following relation already exists!");
@@ -55,7 +55,7 @@ namespace TaskIT.Controllers
         [HttpDelete("UnfollowEmployer/{followedUserId}")]
         public async Task<IActionResult> UnfollowEmployer([FromRoute] string followedUserId)
         {
-            var followerUserId = GetUserId();
+            var followerUserId = User.GetUserId();
             var followerUser = await userRepository.EntityExist(followerUserId);
             var followedUser = await userRepository.EntityExist(followedUserId);
 
@@ -80,13 +80,11 @@ namespace TaskIT.Controllers
         [HttpGet("GetFollowedEmployers")]
         public async Task<IActionResult> GetFollowedEmployers()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var followedEmployers = await userFollowingRepository.GetFollowedEmployers(workerId);
             var followedResponse = followedEmployers.Select(f => f.ToEmployerResponseFromUser());
             
             return Ok(followedResponse);
         }
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

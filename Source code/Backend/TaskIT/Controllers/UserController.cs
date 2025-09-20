@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using TaskIT.Constants;
 using TaskIT.DTOs.UserDTOs;
-using TaskIT.DTOs.UserFollowingDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.UserRepositoryF;
 
@@ -10,7 +9,7 @@ namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
         private readonly UserRepository userRepository; 
         public UserController(UserRepository userRepository)
@@ -22,7 +21,7 @@ namespace TaskIT.Controllers
         [HttpGet("FindUserForProfile")]
         public async Task<IActionResult> FindUserForProfile()
         {
-            var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =  User.GetUserId();
             var user = await userRepository.GetAsync(userId);
             if (user == null) 
                 return NotFound($"User with not found.");
@@ -34,7 +33,7 @@ namespace TaskIT.Controllers
         [HttpPut("UpdateUserInformation")]
         public async Task<IActionResult> UpdateUserInformation([FromBody] UpdateUserRequest updateUser)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.GetUserId();
             var user = await userRepository.UpdateUserAsync(userId, updateUser);
             return Ok(user.ToUserDTO());
         }
@@ -43,7 +42,7 @@ namespace TaskIT.Controllers
         [HttpDelete("DeleteUser")]
         public async Task<IActionResult> DeleteUser()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.GetUserId();
             await userRepository.DeleteAsync(userId);
             return NoContent();
         }
@@ -52,14 +51,11 @@ namespace TaskIT.Controllers
         [HttpGet("GetEmployers")]
         public async Task<IActionResult> GetEmployers()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var employers = await userRepository.GetEmployersForWorker(workerId);
             var employerResponse = employers.Select(e=>e.ToEmployerResponseFromUser());
             return Ok(employerResponse);
 
         }
-
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
-using System.Security.Claims;
 using TaskIT.Communication.NotificationServices;
+using TaskIT.Constants;
 using TaskIT.Mapping;
-using TaskIT.Model;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
@@ -60,7 +58,7 @@ namespace TaskIT.Controllers
         [HttpPut("SendApplayForJob/{jobAdvertisementId}")]
         public async Task<IActionResult> SendApplayForJob([FromRoute] string jobAdvertisementId)
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
 
             var jobApplicationExist = await jobApplicationRepository.GetExistingJobApplicationForWorker(jobAdvertisementId, workerId);
             if (jobApplicationExist != null)
@@ -112,7 +110,7 @@ namespace TaskIT.Controllers
         [HttpPut("DeclineApplicationForJobByWorker/{jobAdvertisementId}")]
         public async Task<IActionResult> DeclineaApplicationForJobByWorker([FromRoute] string jobAdvertisementId)
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var jobApplication = await jobApplicationRepository.GetExistingJobApplicationForWorker(jobAdvertisementId, workerId);
             if (jobApplication == null)
             {
@@ -144,7 +142,7 @@ namespace TaskIT.Controllers
         [HttpPut("AcceptApplicationForJob/{jobApplicationId}")]
         public async Task<IActionResult> AcceptApplicationForJob([FromRoute] string jobApplicationId)
         {
-            var employerId = GetUserId();
+            var employerId = User.GetUserId();
             var employer = await userRepository.GetAsync(employerId);
             var jobApplicationAccepted = await jobApplicationRepository.GetJobApplication(jobApplicationId);
 
@@ -174,14 +172,12 @@ namespace TaskIT.Controllers
         [HttpGet("GetAppliedJobsForWorker")]
         public async Task<IActionResult> GetAppliedJobsForWorker()
         {
-            var workerId = GetUserId();
+            var workerId = User.GetUserId();
             var jobAdvertisementsApplied = await jobApplicationRepository.GetJobAdvertisementForWorker(workerId);
            var jobAdvertisementsResponse = jobAdvertisementsApplied.Select(ja=>ja.ToJobAdvertisementDTO());
             return Ok(jobAdvertisementsResponse);
 
         }
-           
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
+        
     }
 }

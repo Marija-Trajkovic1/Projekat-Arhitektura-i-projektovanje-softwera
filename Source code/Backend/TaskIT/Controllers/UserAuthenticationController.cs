@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TaskIT.Constants;
 using TaskIT.DTOs.AuthenticateUserDTOs;
 using TaskIT.Mapping;
 using TaskIT.Services;
@@ -10,12 +11,11 @@ namespace TaskIT.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserAuthenticationController : Controller
+    public class UserAuthenticationController : ControllerBase
     {
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
         private readonly TokenService tokenService;
-
         public UserAuthenticationController(UserManager<User> userManager, SignInManager<User> signInManager, TokenService tokenService)
         {
             this.userManager = userManager;
@@ -56,7 +56,7 @@ namespace TaskIT.Controllers
         [HttpPost("ChangeRole")]
         public async Task<IActionResult> ChangeRole(string currentRole)
         {
-            var userId = GetUserId();
+            var userId = User.GetUserId();
             var user= await userManager.FindByIdAsync(userId);
             if (user == null) return NotFound("User not found");
 
@@ -90,7 +90,5 @@ namespace TaskIT.Controllers
             return Ok(new { Token = token, UserResponse = userResponse, Role = role });
         }
 
-        private string GetUserId() =>
-           User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

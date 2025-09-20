@@ -2,7 +2,7 @@
 {
     public interface FollowingNotificationService
     {
-        Task NotifyEmployerFollowed(string employerId, string workerName);
-        Task NotifyEmployerUnfollowed(string employerId, string workerName);
+        Task NotifyEmployerFollowed(string employerId, string workerUserName);
+        Task NotifyEmployerUnfollowed(string employerId, string workerUserName);
     }
 }

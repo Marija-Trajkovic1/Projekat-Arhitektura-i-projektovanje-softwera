@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using TaskIT.Constants;
 
 namespace TaskIT.Hubs
 {
@@ -6,7 +7,7 @@ namespace TaskIT.Hubs
     {
        public override async Task OnConnectedAsync()
         {
-            var userId = Context.UserIdentifier;
+            var userId =  Context.User.GetUserId();
             if(!string.IsNullOrEmpty(userId))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
@@ -16,11 +17,12 @@ namespace TaskIT.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = Context.UserIdentifier;
+            var userId = Context.User.GetUserId();
             if(!string.IsNullOrEmpty(userId))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
             }
+            Console.WriteLine($"Client disconnected: {exception?.Message}");
             await base.OnDisconnectedAsync(exception);
         }
 

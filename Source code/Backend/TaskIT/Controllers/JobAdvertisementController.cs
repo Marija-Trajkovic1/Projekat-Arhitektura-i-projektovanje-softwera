@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TaskIT.Communication.NotificationServices;
+using TaskIT.Constants;
 using TaskIT.DTOs.JobAdvertisementDTOs;
 using TaskIT.Filters;
 using TaskIT.Mapping;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
-using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
-using TaskIT.Repository.WorkerJobTypeFollowingF;
 
 
 namespace TaskIT.Controllers
@@ -61,7 +59,7 @@ namespace TaskIT.Controllers
         [HttpPost("AddNewJobAdvertisement")]
         public async Task<IActionResult> AddNewJobAdvertisement([FromBody] CreateJobAdvertisementRequest jobAdvertisementDTO)
         {
-            var employerId = GetUserId();
+            var employerId = User.GetUserId();
             Console.WriteLine($"EmployerId iz tokena: {employerId}");
             if (await userRepository.EntityExist(employerId)) 
             {
@@ -126,7 +124,7 @@ namespace TaskIT.Controllers
         {
             try
             {
-                var employerId = GetUserId();
+                var employerId = User.GetUserId();
                 var (strategy, filterValue) = jobFilterStrategyFactory.GetStrategyAndValue(filterBy, employerId,employerIds, minSalary, maxSalary, jobTypes,jobType, city);
                 var allJobAdvertisements = jobAdvertisementRepository.GetAllQueryable();
                 if (excludeOwn)
@@ -158,7 +156,5 @@ namespace TaskIT.Controllers
             }
         }
 
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

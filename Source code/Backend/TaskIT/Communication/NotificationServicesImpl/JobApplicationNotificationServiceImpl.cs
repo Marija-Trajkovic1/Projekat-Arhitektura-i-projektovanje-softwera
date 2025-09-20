@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using TaskIT.Communication.NotificationServices;
+using TaskIT.Constants;
 using TaskIT.Hubs;
 
-namespace TaskIT.Communication
+namespace TaskIT.Communication.NotificationServicesImpl
 {
     public class JobApplicationNotificationServiceImpl : JobApplicationNotificationService
     {
@@ -13,11 +14,11 @@ namespace TaskIT.Communication
         }
         public async Task NotifyApplicationSubmitted(string employerId, string workerId, string jobId, string title)
         {
-            await taskItHubContext.Clients.Group(employerId).SendAsync("NewApplication", workerId, jobId, title);
+            await taskItHubContext.Clients.Group(employerId).SendAsync(NotificationEvents.NewApplication, workerId, jobId, title);
         }
         public async Task NotifyApplicationDeclined(string employerId, string workerId, string jobId)
         {
-            await taskItHubContext.Clients.Group(employerId).SendAsync("ApplicationDeclined",workerId, jobId);
+            await taskItHubContext.Clients.Group(employerId).SendAsync(NotificationEvents.ApplicationDeclined,workerId, jobId);
         }
 
     }
