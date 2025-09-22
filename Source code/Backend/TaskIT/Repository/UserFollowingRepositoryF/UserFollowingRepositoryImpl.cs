@@ -36,6 +36,15 @@ namespace TaskIT.Repository.UserFollowingRepositoryF
 
         }
 
+        public async Task<List<string>> GetFollowedEmployerIds(string workerId)
+        {
+            var followedEmployerIds = await context.UserFollowings
+                                    .Where(uf => uf.FollowerId == workerId)
+                                    .Select(uf=>uf.FollowedId)
+                                    .ToListAsync();
+            return followedEmployerIds; 
+        }
+
         public async Task<UserFollowing> CreateNewFollowingAsync(UserFollowing newFollowing)
         {
             await context.UserFollowings.AddAsync(newFollowing);

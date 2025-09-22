@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskIT.Communication.NotificationServices;
 using TaskIT.Constants;
+using TaskIT.DTOs.MessagesDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
@@ -14,13 +15,13 @@ namespace TaskIT.Controllers
     {
         private readonly UserFollowingRepository userFollowingRepository;
         private readonly UserRepository userRepository;
-        private readonly FollowingNotificationService followingNotificationService;
+        private readonly NotificationService notificationService;
         
-        public UserFollowingController( UserRepository userRepository, UserFollowingRepository userFollowingRepository, FollowingNotificationService followingNotificationService)
+        public UserFollowingController( UserRepository userRepository, UserFollowingRepository userFollowingRepository, NotificationService notificationService)
         {
             this.userFollowingRepository = userFollowingRepository;
             this.userRepository = userRepository;
-            this.followingNotificationService = followingNotificationService;
+            this.notificationService = notificationService;
         }
 
         [Authorize(Roles = "WORKER")]
@@ -45,7 +46,8 @@ namespace TaskIT.Controllers
                 Console.WriteLine("After saving:", createdFollowing.ToString());
 
                 var worker = await userRepository.GetAsync(workerId);
-                await followingNotificationService.NotifyEmployerFollowed(employerId, worker.UserName);
+                var message =new MessageDTO{Message= $"Zapratio Vas je korisnik {worker.UserName}."};
+                await notificationService.NotifyUser(NotificationEvents.EmployerFollowed, employerId, message);
                 return Ok(createdFollowing);
             }
             return BadRequest("This following relation already exists!");
@@ -72,7 +74,8 @@ namespace TaskIT.Controllers
             var follower = await userRepository.GetAsync(followerUserId);
             var followerName = follower.Name;
 
-            await followingNotificationService.NotifyEmployerUnfollowed(followedUserId, followerName);
+            var message = new MessageDTO { Message = $"Korisnik {followerName} vas je otpratio!" };
+            await notificationService.NotifyUser( NotificationEvents.EmployerUnfollowed, followedUserId, message);
             return Ok("User succesfuly unfollowed!");
         }
 

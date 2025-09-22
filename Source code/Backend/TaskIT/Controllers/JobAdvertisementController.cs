@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using TaskIT.Communication.NotificationServices;
 using TaskIT.Constants;
 using TaskIT.DTOs.JobAdvertisementDTOs;
+using TaskIT.DTOs.MessagesDTOs;
 using TaskIT.Filters;
 using TaskIT.Mapping;
+using TaskIT.Model;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
@@ -19,20 +21,20 @@ namespace TaskIT.Controllers
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
         private readonly UserRepository userRepository;
         private readonly JobApplicationRepository jobApplicationRepository;
-        private readonly JobAdvertisementNotificationService jobAdvertisementNotificationService;
+        private readonly NotificationService notificationService;
         private readonly JobFilterStrategyFactory jobFilterStrategyFactory;
 
         public JobAdvertisementController(
             JobAdvertisementRepository jobAdvertisementRepository, 
             UserRepository userRepository, 
             JobApplicationRepository jobApplicationRepository,
-            JobAdvertisementNotificationService jobAdvertisementNotificationService,
+            NotificationService notificationService,
             JobFilterStrategyFactory jobFilterStrategyFactory)
         {
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.userRepository = userRepository;
             this.jobApplicationRepository = jobApplicationRepository;
-            this.jobAdvertisementNotificationService = jobAdvertisementNotificationService;
+            this.notificationService = notificationService;
             this.jobFilterStrategyFactory = jobFilterStrategyFactory;   
         }
 
@@ -65,14 +67,15 @@ namespace TaskIT.Controllers
             {
                 var jobAdvertisement = jobAdvertisementDTO.ToJobAdvertisementFromCreateJobAdvertisementRequest(employerId);
                 jobAdvertisement.IsAvailable = true;
-                Console.WriteLine($"MyEmployerId pre čuvanja: {jobAdvertisement.MyEmployerId}");
                 if (jobAdvertisement == null)
                     return BadRequest("Invalid job advertisement data.");
                 
-               var createdJobAdvertisement = await jobAdvertisementRepository.CreateAsync(jobAdvertisement);
-                Console.WriteLine($"MyEmployerId posle čuvanja: {createdJobAdvertisement.MyEmployerId}");
-
-                await jobAdvertisementNotificationService.NotifyNewJobAdvertisement(createdJobAdvertisement.Id, createdJobAdvertisement.Title, createdJobAdvertisement.MyEmployerId, createdJobAdvertisement.JobType);
+                var createdJobAdvertisement = await jobAdvertisementRepository.CreateAsync(jobAdvertisement);
+                var message = new MessageDTO {Message=$"Postavio sam novi oglas za posao, {jobAdvertisement.Title}." };
+                var groupJobTypeName = $"jobType_{createdJobAdvertisement.JobType}";
+                var groupEmployerName = $"employer_{employerId}";
+                await notificationService.NotifyGroup(NotificationEvents.NewJobPosted, groupJobTypeName, message);
+                await notificationService.NotifyGroup(NotificationEvents.NewJobPosted, groupEmployerName, message);
 
                 return CreatedAtAction(nameof(FindJobAdvertisementById), new { id = jobAdvertisement.Id }, jobAdvertisement.ToJobAdvertisementDTO());
 
@@ -90,11 +93,15 @@ namespace TaskIT.Controllers
             }
             
             var jobAdvertisementUpdated = await jobAdvertisementRepository.UpdateJobAdvertisementAsync(jobAdvertisementId, jobAdvertisementDTO);
-
+            var employerId = User.GetUserId();
             var jobApplication = await jobApplicationRepository.GetAcceptedJobApplication(jobAdvertisementId);
             if(jobApplication != null)
             {
-                await jobAdvertisementNotificationService.NotifyJobAdvertisementUpdated(jobAdvertisementId, jobAdvertisementUpdated.Title, jobApplication.WorkerId, jobAdvertisementUpdated.MyEmployerId, jobAdvertisementUpdated.JobType);
+                var message = new MessageDTO { Message = $"Ažurirao sam oglas za posao, {jobAdvertisementUpdated.Title}." };
+                var groupJobTypeName = $"jobType_{jobAdvertisementUpdated.JobType}";
+                var groupEmployerName = $"employer_{employerId}";
+                await notificationService.NotifyGroup(NotificationEvents.JobUpdated, groupJobTypeName, message);
+                await notificationService.NotifyGroup(NotificationEvents.JobUpdated, groupEmployerName, message);
             }
             return Ok(jobAdvertisementUpdated.ToJobAdvertisementDTO());
         }

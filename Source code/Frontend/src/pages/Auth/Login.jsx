@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useSignalR } from "../../context/SignalRContext";
 import axios from "axios";
 
 function Login() {
@@ -11,6 +12,7 @@ function Login() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const {startConnection} = useSignalR();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,6 +32,7 @@ function Login() {
       const normalizedRole = role.toUpperCase();
       login(userResponse, token, normalizedRole);
       navigate("/profile");
+      await startConnection(token);
     } catch (err) {
       console.log("Grska pri loginu:", err);
       setError("Your email and password are incorrect!");

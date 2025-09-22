@@ -13,11 +13,11 @@ namespace TaskIT.Controllers
     public class FinishedJobController : ControllerBase
     {
         private readonly FinishedJobRepository finishedJobRepository;
-        private readonly FinishedJobNotificationService finishedJobNotificationService;
-        public FinishedJobController(FinishedJobRepository finishedJobRepository, FinishedJobNotificationService finishedJobNotificationService)
+        private readonly NotificationService notificationService;
+        public FinishedJobController(FinishedJobRepository finishedJobRepository, NotificationService notificationService)
         {
             this.finishedJobRepository = finishedJobRepository;
-            this.finishedJobNotificationService = finishedJobNotificationService;
+            this.notificationService = notificationService;
         }
 
         [HttpGet("FindAllFinishedJobsForWorker")]
@@ -69,8 +69,7 @@ namespace TaskIT.Controllers
             var finishedJob = await finishedJobRepository.WorkerEvaluateAsync(finishedJobId, workerEvaluation);
             var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
 
-
-            await finishedJobNotificationService.NotifyWorkerEvaluated(finishedJob.WorkerId, finishedJob.JobAdvertisement.Title, workerEvaluation);
+            //await finishedJobNotificationService.NotifyWorkerEvaluated(finishedJob.WorkerId, finishedJob.JobAdvertisement.Title, workerEvaluation);
             return Ok(finishedJob.WorkerEvaluation);
         }
 
@@ -103,7 +102,7 @@ namespace TaskIT.Controllers
             var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
             if (jobAdvertisement == null) return BadRequest("Job advertisement not found!");
 
-            await finishedJobNotificationService.NotifyEmployerEvaluated(finishedJob.EmployerId, finishedJob.JobAdvertisement.Title, employerEvaluation);
+            //await finishedJobNotificationService.NotifyEmployerEvaluated(finishedJob.EmployerId, finishedJob.JobAdvertisement.Title, employerEvaluation);
 
             var response = jobAdvertisement.ToFinishedJobAdvertisementResponseEvaluation(finishedJobId, employerEvaluation);
             return Ok(response);

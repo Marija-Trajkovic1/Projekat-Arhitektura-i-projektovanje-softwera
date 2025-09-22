@@ -2,9 +2,11 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useSignalR } from "../../context/SignalRContext";
 
 const Profile = () => {
   const { user, token, role, logout, updateAuth } = useAuth();
+  const {refreshConnection} =useSignalR();
   const [profileData, setProfileData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -98,7 +100,7 @@ const Profile = () => {
         user: response.data.userResponse,
         role: response.data.role,
       });
-
+      refreshConnection(response.data.token);
       setProfileData(response.data.userResponse);
       setFormData({
         phoneNumber: response.data.userResponse.phoneNumber || "",
@@ -114,6 +116,7 @@ const Profile = () => {
       if (error.response?.status === 401) {
         console.log("401 Unauthorized detected, logging out");
         logout();
+
       }
       alert("Neuspešna promena uloge! Molimo Vas pokušajte ponovo!");
     }finally{
@@ -235,12 +238,6 @@ const Profile = () => {
        {isLoading ? "Obrada...":role==="WORKER"? "Postani poslodavac" : "Postani radnik"}
       </button>
 
-      <button
-        onClick={logout}
-        className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2"
-      >
-        Odjavi se
-      </button>
     </>
   );
 

@@ -1,15 +1,18 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useSignalR } from "../../context/SignalRContext";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, role, logout, loading } = useAuth();
+  const { user, role, token, logout, loading } = useAuth();
+  const {stopConnection} = useSignalR();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
     logout();
+    stopConnection(token);
     navigate("/");
   };
 

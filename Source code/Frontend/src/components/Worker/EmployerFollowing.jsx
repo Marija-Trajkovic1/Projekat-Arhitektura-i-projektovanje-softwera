@@ -1,9 +1,11 @@
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useSignalR } from "../../context/SignalRContext";
 
 const EmployerFollowing = ({onEmployersChange}) => {
   const { token } = useAuth();
+  const {connection} = useSignalR();
   const [employersList, setEmployersList] = useState([]);
   const [followedEmployers, setFollowedEmployers] = useState([]);
   const [loadingIds, setLoadingIds] = useState([]);
@@ -44,7 +46,9 @@ const EmployerFollowing = ({onEmployersChange}) => {
           `https://localhost:7260/UserFollowing/UnfollowEmployer/${employerId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+       
         alert("Uspešno ste otpratili poslodavca!");
+         await connection.invoke("UnfollowEmployer", employerId);
       } else {
         await axios.post(
           `https://localhost:7260/UserFollowing/NewFollowing/${employerId}`,
@@ -52,13 +56,14 @@ const EmployerFollowing = ({onEmployersChange}) => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert("Uspešno ste zapratili poslodavca!");
+        await connection.invoke("FollowEmployer", employerId);
       }
 
       const refreshed = await axios.get(
         `https://localhost:7260/UserFollowing/GetFollowedEmployers`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const updated =refreshed.data.map((e) => String(e.id)) || [];
+      const updated = refreshed.data.map((e) => String(e.id)) || [];
       setFollowedEmployers(updated);
       onEmployersChange(updated);
     } catch (error) {

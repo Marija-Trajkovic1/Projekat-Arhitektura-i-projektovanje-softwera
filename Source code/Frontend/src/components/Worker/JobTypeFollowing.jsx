@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { jobTypes } from "../../constants/JobTypes";
+import { useSignalR } from "../../context/SignalRContext";
 
 const JobTypeFollowing = ({onJobTypeChange}) => {
   const { token } = useAuth();
+  const {connection} = useSignalR();
   const [followedJobTypes, setFollowedJobTypes] = useState([]);
 
   useEffect(() => {
@@ -39,6 +41,8 @@ const JobTypeFollowing = ({onJobTypeChange}) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        await connection.invoke("UnfollowJobType", encodeURIComponent(type));
+        console.log("Izbacen iz grupe pracenja tipa: ", type);
       } else {
         await axios.post(
           `https://localhost:7260/WorkerJobTypeFollowing/AddNewFollowing/${jobType}`,
@@ -47,6 +51,8 @@ const JobTypeFollowing = ({onJobTypeChange}) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        await connection.invoke("FollowJobType", encodeURIComponent(type));
+        console.log("Ubacen u grupu pracenja tipa:", type);
       }
 
       const refreshed = await axios.get(

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskIT.Communication.NotificationServices;
 using TaskIT.Constants;
+using TaskIT.DTOs.MessagesDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
@@ -20,9 +21,7 @@ namespace TaskIT.Controllers
         private readonly UserRepository userRepository;
         private readonly FinishedJobRepository finishedJobRepository;
         private readonly UnitOfWork unitOfWork;
-        private readonly JobApplicationNotificationService jobApplicationNotificationService;
-        private readonly JobAdvertisementNotificationService jobAdvertisementNotificationService;
-        private readonly FinishedJobNotificationService finishedJobNotificationService;
+        private readonly NotificationService notificationService;
 
         public JobApplicationController(
             JobApplicationRepository jobApplicationRepository, 
@@ -30,18 +29,14 @@ namespace TaskIT.Controllers
             UserRepository userRepository, 
             UnitOfWork unitOfWork,
             FinishedJobRepository finishedJobRepository,
-            JobApplicationNotificationService jobApplicationNotificationService, 
-            JobAdvertisementNotificationService jobAdvertisementNotificationService,
-            FinishedJobNotificationService finishedJobNotificationService)
+            NotificationService notificationService)
         {
             this.jobApplicationRepository = jobApplicationRepository;
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.userRepository = userRepository;
             this.finishedJobRepository = finishedJobRepository;
             this.unitOfWork = unitOfWork;
-            this.jobApplicationNotificationService = jobApplicationNotificationService;
-            this.jobAdvertisementNotificationService = jobAdvertisementNotificationService;
-            this.finishedJobNotificationService = finishedJobNotificationService;
+            this.notificationService = notificationService;
         }
 
         [Authorize(Roles ="EMPLOYER")]
@@ -76,11 +71,15 @@ namespace TaskIT.Controllers
             if(await jobAdvertisementRepository.UpdateAsync(jobAdvertisement.Id, jobAdvertisement) != null)
             {
                 var employerId = jobAdvertisement.MyEmployerId;
-
-                await jobApplicationNotificationService.NotifyApplicationSubmitted(employerId, workerId, jobAdvertisementId, jobAdvertisement.Title);
+                var worker = await userRepository.GetAsync(workerId);
+                var message = new MessageDTO { Message = $"Korisnik {worker.Name} se prijavio za oglas: {jobAdvertisement.Title}." };
+                await notificationService.NotifyUser(NotificationEvents.WorkerApplication ,employerId, message);
+                var groupJobTypeName = $"jobType_{jobAdvertisement.JobType}";
+                var groupEmployerName = $"employer_{employerId}";
+                await notificationService.NotifyGroup(NotificationEvents.WorkerApplication, groupJobTypeName, message);
+                await notificationService.NotifyGroup(NotificationEvents.WorkerApplication, groupEmployerName, message);
                 return Ok(savedApplication.ToJobApplicationDTO());
             }
-
             return BadRequest("Job Advertisement status is not updated!");
         }
 
@@ -88,6 +87,7 @@ namespace TaskIT.Controllers
         [HttpPut("DeclineApplicationForJobByEmployer")]
         public async Task<IActionResult> DeclineaApplicationForJobByEmployer([FromQuery] string jobApplicationId, [FromQuery] string workerId)
         {
+            var employerId = User.GetUserId();
             var jobApplicationAccepted = await jobApplicationRepository.GetJobApplication(jobApplicationId);
             
             if (jobApplicationAccepted.WorkerId!=workerId)
@@ -100,9 +100,13 @@ namespace TaskIT.Controllers
             var updatedJobAdv = await jobAdvertisementRepository.UpdateAsync(jobApplicationAccepted.JobId, jobAdvertisement);
 
             await unitOfWork.CompleteAsync();
-
-            await jobAdvertisementNotificationService.NotifyJobApplicationRejected(workerId, jobApplicationAccepted.JobId, jobAdvertisement.Title);
-            await jobAdvertisementNotificationService.NotifyAvailableAgain(jobApplicationAccepted.JobId, jobAdvertisement.Title, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
+            var employer = await userRepository.GetAsync(employerId);
+            var message = new MessageDTO { Message = $"Odbio sam prijavu za posao {jobAdvertisement.Title}, posao je ponovo dostupan, {employer.Name}." };
+            await notificationService.NotifyUser(NotificationEvents.ApplicationRejected, workerId, message);
+            var groupJobTypeName = $"jobType_{jobAdvertisement.JobType}";
+            var groupEmployerName = $"employer_{employerId}";
+            await notificationService.NotifyGroup(NotificationEvents.ApplicationRejected, groupJobTypeName, message);
+            await notificationService.NotifyGroup(NotificationEvents.ApplicationRejected, groupEmployerName, message);
             return Ok(updatedJobAdv);
         }
 
@@ -127,15 +131,15 @@ namespace TaskIT.Controllers
                 jobAdvertisement.IsAvailable = true;
                 var updatedJobAdv = await jobAdvertisementRepository.UpdateAsync(jobAdvertisement.Id, jobAdvertisement);
 
-                await unitOfWork.CompleteAsync();
-
-                await jobApplicationNotificationService.NotifyApplicationDeclined(jobAdvertisement.MyEmployerId, workerId, jobAdvertisementId);
-                await jobAdvertisementNotificationService.NotifyAvailableAgain(jobAdvertisement.Id, jobAdvertisement.Title, jobAdvertisement.MyEmployerId, jobAdvertisement.JobType);
-               
+                var message = new MessageDTO { Message = $"Radnik je otkazao prijavu za posao {updatedJobAdv.Title}, oglas je ponovo dostupan!" };
+                await notificationService.NotifyUser(NotificationEvents.ApplicationDeclined, updatedJobAdv.MyEmployerId, message);
+                var groupJobTypeName = $"jobType_{updatedJobAdv.JobType}";
+                var groupEmployerName = $"employer_{updatedJobAdv.MyEmployerId}";
+                await notificationService.NotifyGroup(NotificationEvents.ApplicationDeclined, groupJobTypeName, message);
+                await notificationService.NotifyGroup(NotificationEvents.ApplicationDeclined, groupEmployerName, message);
                 return Ok(updatedJobAdv);
             }
-            return BadRequest("Decline not succeded!");
-            
+            return BadRequest("Decline not succeded!");    
         }
 
         [Authorize(Roles = "EMPLOYER")]
@@ -163,7 +167,8 @@ namespace TaskIT.Controllers
 
             await unitOfWork.CompleteAsync();
 
-            await finishedJobNotificationService.NotifyAccepted(workerId, jobApplicationAccepted.JobId, jobAdvertisement.Title, employer.Name);
+            var message = new MessageDTO { Message = $"Prihvatio sam Vašu prijavu na posao: {jobAdvertisement.Title}, {employer.Name}" };
+            await notificationService.NotifyUser(NotificationEvents.ApplicationAccepted, workerId, message);
 
             return Ok(acceptedJobApplication);
         }

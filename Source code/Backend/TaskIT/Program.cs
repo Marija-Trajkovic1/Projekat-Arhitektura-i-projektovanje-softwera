@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using TaskIT.Communication.GroupManager;
 using TaskIT.Communication.NotificationServices;
 using TaskIT.Communication.NotificationServicesImpl;
 using TaskIT.Filters;
@@ -18,15 +19,11 @@ using TaskIT.Repository.UserRepositoryF;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
 using TaskIT.Services;
 
-//global using Microsoft.EntityFrameworkCore.SqlServer;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<JobAdvertisementNotificationService, JobAdvertisementNotificationServiceImpl>();
-builder.Services.AddSingleton<JobApplicationNotificationService, JobApplicationNotificationServiceImpl>();
-builder.Services.AddSingleton<FollowingNotificationService, FollowingNotificationServiceImpl>();
-builder.Services.AddSingleton<FinishedJobNotificationService, FinishedJobNotificationServiceImpl>();
+builder.Services.AddSingleton<NotificationService, NotificationServiceImpl>();
+builder.Services.AddScoped<SignalRGroupManager>();
 
 builder.Services.AddControllers();
 
