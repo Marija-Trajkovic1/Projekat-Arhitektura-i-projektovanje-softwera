@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using TaskIT.Communication.NotificationServices;
 using TaskIT.Constants;
 using TaskIT.DTOs.FinishedJobDTOs;
+using TaskIT.DTOs.MessagesDTOs;
+using TaskIT.DTOs.NotificationDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
+using TaskIT.Repository.UserRepositoryF;
 
 namespace TaskIT.Controllers
 {
@@ -13,10 +16,12 @@ namespace TaskIT.Controllers
     public class FinishedJobController : ControllerBase
     {
         private readonly FinishedJobRepository finishedJobRepository;
+        private readonly UserRepository userRepository;
         private readonly NotificationService notificationService;
-        public FinishedJobController(FinishedJobRepository finishedJobRepository, NotificationService notificationService)
+        public FinishedJobController(FinishedJobRepository finishedJobRepository,UserRepository userRepository, NotificationService notificationService)
         {
             this.finishedJobRepository = finishedJobRepository;
+            this.userRepository = userRepository;
             this.notificationService = notificationService;
         }
 
@@ -68,8 +73,7 @@ namespace TaskIT.Controllers
         {
             var finishedJob = await finishedJobRepository.WorkerEvaluateAsync(finishedJobId, workerEvaluation);
             var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
-
-            //await finishedJobNotificationService.NotifyWorkerEvaluated(finishedJob.WorkerId, finishedJob.JobAdvertisement.Title, workerEvaluation);
+            
             return Ok(finishedJob.WorkerEvaluation);
         }
 
@@ -97,12 +101,16 @@ namespace TaskIT.Controllers
         [HttpPut("EmployerEvaluation")]
         public async Task<IActionResult> EmployerEvaluation([FromQuery] string finishedJobId, [FromQuery] int employerEvaluation)
         {
+            var workerId = User.GetUserId();
+            var worker = await userRepository.GetAsync(workerId);
             var finishedJob = await finishedJobRepository.EmployerEvaluateAsync(finishedJobId, employerEvaluation);
             if (finishedJob == null) return BadRequest("Finished job not found!");
             var jobAdvertisement = await finishedJobRepository.GetJobAdvertisementForEvaluationEmployer(finishedJobId);
             if (jobAdvertisement == null) return BadRequest("Job advertisement not found!");
 
-            //await finishedJobNotificationService.NotifyEmployerEvaluated(finishedJob.EmployerId, finishedJob.JobAdvertisement.Title, employerEvaluation);
+            var message = new MessageDTO { Message = $"Korisnik {worker.UserName} vas je occenio za posao {jobAdvertisement.Title} ocenom: {employerEvaluation} " };
+
+            await notificationService.NotifyUser(NotificationEvents.EmployerEvaluated,jobAdvertisement.MyEmployerId, message);
 
             var response = jobAdvertisement.ToFinishedJobAdvertisementResponseEvaluation(finishedJobId, employerEvaluation);
             return Ok(response);

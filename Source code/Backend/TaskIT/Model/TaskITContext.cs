@@ -14,6 +14,7 @@ namespace TaskIT.Model
         public DbSet<UserFollowing> UserFollowings { get; set; }
         public DbSet<WorkerJobTypeFollowing> WorkerJobTypeFollowings { get; set; }
         public DbSet<JobApplication> JobApplications { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

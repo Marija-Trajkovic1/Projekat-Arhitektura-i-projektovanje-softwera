@@ -29,5 +29,6 @@ namespace TaskIT.Model
         public List<JobAdvertisement> UserPostedAdv { get; set; } = new ();
 
         public List<JobApplication> UserAppliedAdv { get; set; } = new ();
+        public List<Notification> UnreadNotifications { get; set; } = new();
     }
 }

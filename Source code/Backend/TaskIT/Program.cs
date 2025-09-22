@@ -13,6 +13,7 @@ using TaskIT.Hubs;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
+using TaskIT.Repository.NotificationRepositoryF;
 using TaskIT.Repository.UnityOfWork;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.UserRepositoryF;
@@ -93,6 +94,7 @@ builder.Services.AddScoped<JobAdvertisementRepository, JobAdvertisementRepositor
 builder.Services.AddScoped<UserFollowingRepository, UserFollowingRepositoryImpl>();
 builder.Services.AddScoped<WorkerJobTypeFollowingRepository, WorkerJobTypeFollowingRepositoryImpl>();
 builder.Services.AddScoped<JobApplicationRepository, JobApplicationRepositoryImpl>();
+builder.Services.AddScoped<NotificationRepository, NotificationRepositoryImpl>();
 builder.Services.AddScoped<UnitOfWork, UnitOfWorkImpl>();
 
 builder.Services.AddSingleton<JobFilterStrategyFactory>();
