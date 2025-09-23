@@ -7,6 +7,7 @@ using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
+using TaskIT.Repository.NotificationRepositoryF;
 using TaskIT.Repository.UnityOfWork;
 using TaskIT.Repository.UserRepositoryF;
 
@@ -20,6 +21,7 @@ namespace TaskIT.Controllers
         private readonly JobAdvertisementRepository jobAdvertisementRepository;
         private readonly UserRepository userRepository;
         private readonly FinishedJobRepository finishedJobRepository;
+        private readonly NotificationRepository notificationRepository;
         private readonly UnitOfWork unitOfWork;
         private readonly NotificationService notificationService;
 
@@ -27,6 +29,7 @@ namespace TaskIT.Controllers
             JobApplicationRepository jobApplicationRepository, 
             JobAdvertisementRepository jobAdvertisementRepository, 
             UserRepository userRepository, 
+            NotificationRepository notificationRepository,
             UnitOfWork unitOfWork,
             FinishedJobRepository finishedJobRepository,
             NotificationService notificationService)
@@ -34,6 +37,7 @@ namespace TaskIT.Controllers
             this.jobApplicationRepository = jobApplicationRepository;
             this.jobAdvertisementRepository = jobAdvertisementRepository;
             this.userRepository = userRepository;
+            this.notificationRepository = notificationRepository;
             this.finishedJobRepository = finishedJobRepository;
             this.unitOfWork = unitOfWork;
             this.notificationService = notificationService;
@@ -74,9 +78,12 @@ namespace TaskIT.Controllers
                 var worker = await userRepository.GetAsync(workerId);
                 var message = new MessageDTO { Message = $"Korisnik {worker.Name} se prijavio za oglas: {jobAdvertisement.Title}." };
                 await notificationService.NotifyUser(NotificationEvents.WorkerApplication ,employerId, message);
+
                 var groupJobTypeName = $"jobType_{jobAdvertisement.JobType}";
-                var groupEmployerName = $"employer_{employerId}";
                 await notificationService.NotifyGroup(NotificationEvents.WorkerApplication, groupJobTypeName, message);
+
+                var groupEmployerName = $"employer_{employerId}";
+
                 await notificationService.NotifyGroup(NotificationEvents.WorkerApplication, groupEmployerName, message);
                 return Ok(savedApplication.ToJobApplicationDTO());
             }

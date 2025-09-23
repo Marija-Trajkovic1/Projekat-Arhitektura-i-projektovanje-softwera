@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using TaskIT.Hubs;
+using TaskIT.Model;
 using TaskIT.Repository.UserFollowingRepositoryF;
 using TaskIT.Repository.WorkerJobTypeFollowingF;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TaskIT.Communication.GroupManager
 {
@@ -31,6 +33,22 @@ namespace TaskIT.Communication.GroupManager
             {
                 await hubContext.Groups.AddToGroupAsync(connectionId, $"employer_{employer}");
             }
+        }
+
+        public async Task<List<string>> GetGroupsForUser(string userId)
+        {
+            var jobTypesFollowed = await jobTypeFollowingRepository.GetFollowedAsync(userId);
+            var groupsList = new List<string>();
+            foreach (var type in jobTypesFollowed)
+            {
+                groupsList.Add($"jobType_{type}");
+            }
+            var employersFollowed = await userFollowingRepository.GetFollowedEmployerIds(userId);
+            foreach (var employer in employersFollowed)
+            {
+                groupsList.Add($"employer_{employer}");
+            }
+            return groupsList;
         }
     }
 }

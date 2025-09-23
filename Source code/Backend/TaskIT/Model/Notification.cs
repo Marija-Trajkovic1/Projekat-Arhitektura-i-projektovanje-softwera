@@ -17,9 +17,6 @@ namespace TaskIT.Model
         public string ReceiverId { get; set; }
 
         [Required]
-        public User Receiver { get; set; }
-
-        [Required]
         public bool IsRead { get; set; } = false;
 
     }

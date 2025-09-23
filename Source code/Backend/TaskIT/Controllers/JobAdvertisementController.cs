@@ -6,7 +6,6 @@ using TaskIT.DTOs.JobAdvertisementDTOs;
 using TaskIT.DTOs.MessagesDTOs;
 using TaskIT.Filters;
 using TaskIT.Mapping;
-using TaskIT.Model;
 using TaskIT.Repository.JobAdvertisementRepositoryF;
 using TaskIT.Repository.JobApplicationRepositoryF;
 using TaskIT.Repository.UserRepositoryF;

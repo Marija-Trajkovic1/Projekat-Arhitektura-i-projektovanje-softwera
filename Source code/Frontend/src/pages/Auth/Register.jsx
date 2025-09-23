@@ -106,6 +106,7 @@ const Register = () => {
           type="text"
           name="street"
           placeholder="Street"
+          maxLength={30}
           value={userRegisterData.street}
           onChange={handleChange}
           className={inputStyle}

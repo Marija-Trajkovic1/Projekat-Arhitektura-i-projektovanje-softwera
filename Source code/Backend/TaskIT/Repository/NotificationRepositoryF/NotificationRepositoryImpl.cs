@@ -1,5 +1,4 @@
-﻿using TaskIT.DTOs.NotificationDTOs;
-
+﻿
 namespace TaskIT.Repository.NotificationRepositoryF
 {
     public class NotificationRepositoryImpl : RepositoryImpl<Notification>, NotificationRepository
@@ -14,10 +13,12 @@ namespace TaskIT.Repository.NotificationRepositoryF
             return notification;
         }
 
-        public async Task<List<string>> GetUnreadMesages(string userId)
+        public async Task<List<string>> GetUnreadMesages(string receiverId)
         {
-            var unreadMessages = await context.Notifications.Where(n => n.ReceiverId == userId && n.IsRead == false).Select(n=>n.MessageText).ToListAsync();
+            var unreadMessages = await context.Notifications.Where(n => n.ReceiverId == receiverId && n.IsRead == false).Select(n=>n.MessageText).ToListAsync();
             return unreadMessages;
         }
+
+
     }
 }

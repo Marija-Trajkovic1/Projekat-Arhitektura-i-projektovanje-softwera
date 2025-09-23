@@ -16,19 +16,8 @@ export default defineConfig({
                 target: 'https://localhost:7260/',
                 secure: false
             },
-      '^/register': {
-                target: 'https://localhost:7260/',
-                secure: false
-            },
-        '^/login': {
-                target: 'https://localhost:7260/',
-                secure: false
-            },
-        '^/logout': {
-                target: 'https://localhost:7260/',
-                secure: false
-            }
     },
     port: 5173,
+    historyApiFallback: true
   }
 })

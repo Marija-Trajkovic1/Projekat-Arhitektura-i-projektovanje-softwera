@@ -1,5 +1,5 @@
 import * as signalR from "@microsoft/signalr";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 const SignalRContext = createContext(null);
 
 export function useSignalR() {
@@ -40,9 +40,18 @@ export function SignalRProvider({ children }) {
       await stopConnection();
       await startConnection(token);
     } catch (error) {
-      console.error("Neuspelo osvežavanje konekcije:", error);
+      console.error("Neuspelo osvežavanje konekcije nakon promene role:", error);
     }
   };
+
+  useEffect(()=>{
+    console.log("Refresh stranice, ponovo povezujem...");
+    const token = sessionStorage.getItem("token");
+    if(token){
+      startConnection(token);
+    }
+    console.log("Uspesno rekonektovano.");
+  }, []);
 
   return (
     <SignalRContext.Provider

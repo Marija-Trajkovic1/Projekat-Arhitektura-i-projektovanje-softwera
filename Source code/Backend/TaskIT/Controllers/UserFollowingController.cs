@@ -29,7 +29,6 @@ namespace TaskIT.Controllers
         public async Task<IActionResult> NewFollowing([FromRoute] string employerId)
         {
             var workerId = User.GetUserId();
-            Console.WriteLine("Pocetak metode: ", workerId.ToString(), employerId.ToString());
             var workerExist = await userRepository.EntityExist(workerId);
             var employerExist = await userRepository.EntityExist(employerId);
 
@@ -42,8 +41,6 @@ namespace TaskIT.Controllers
             {
                 var newFollowing = new UserFollowing { FollowedId = employerId, FollowerId = workerId };
                 var createdFollowing = await userFollowingRepository.CreateNewFollowingAsync(newFollowing);
-
-                Console.WriteLine("After saving:", createdFollowing.ToString());
 
                 var worker = await userRepository.GetAsync(workerId);
                 var message =new MessageDTO{Message= $"Zapratio Vas je korisnik {worker.UserName}."};

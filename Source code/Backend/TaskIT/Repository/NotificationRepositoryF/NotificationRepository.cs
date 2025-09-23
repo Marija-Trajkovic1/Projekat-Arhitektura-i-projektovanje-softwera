@@ -1,5 +1,4 @@
-﻿using TaskIT.DTOs.NotificationDTOs;
-
+﻿
 namespace TaskIT.Repository.NotificationRepositoryF
 {
     public interface NotificationRepository: Repository<Notification>

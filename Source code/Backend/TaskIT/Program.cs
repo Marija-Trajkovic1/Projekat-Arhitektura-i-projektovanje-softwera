@@ -23,7 +23,7 @@ using TaskIT.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<NotificationService, NotificationServiceImpl>();
+builder.Services.AddScoped<NotificationService, NotificationServiceImpl>();
 builder.Services.AddScoped<SignalRGroupManager>();
 
 builder.Services.AddControllers();

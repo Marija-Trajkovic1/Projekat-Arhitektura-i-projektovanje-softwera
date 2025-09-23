@@ -4,7 +4,6 @@ using TaskIT.Communication.NotificationServices;
 using TaskIT.Constants;
 using TaskIT.DTOs.FinishedJobDTOs;
 using TaskIT.DTOs.MessagesDTOs;
-using TaskIT.DTOs.NotificationDTOs;
 using TaskIT.Mapping;
 using TaskIT.Repository.FinishedJobRepositoryF;
 using TaskIT.Repository.UserRepositoryF;

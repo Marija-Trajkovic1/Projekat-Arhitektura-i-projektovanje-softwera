@@ -13,12 +13,12 @@ const Landing=()=>{
                 <button
                 onClick={()=>navigate("/login")}
                 className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                    Login
+                    Prijavi se
                 </button>
                 <button
                     onClick={()=>navigate("/register")}
                     className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition">
-                    Register
+                    Registruj se
                 </button>
             </div>
         </div>
