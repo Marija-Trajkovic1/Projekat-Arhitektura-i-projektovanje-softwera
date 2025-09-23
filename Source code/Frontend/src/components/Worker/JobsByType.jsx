@@ -2,9 +2,11 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import qs from "qs";
+import { useSignalR } from "../../context/SignalRContext";
 
 const JobsByType = ({ jobTypes }) => {
   const { token } = useAuth();
+  const{connection} = useSignalR();
   const [jobAds, setJobAds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingIds, setLoadingIds] = useState([]);
@@ -46,6 +48,21 @@ const JobsByType = ({ jobTypes }) => {
   useEffect(() => {
     getJobAds();
   }, [jobTypes, token]);
+
+  useEffect(()=>{
+    if(!connection) return;
+    const handleRefreshJobs=()=>{
+      getJobAds();
+    }
+    connection.on("WorkerApplication", handleRefreshJobs);
+    connection.on("ApplicationRejected", handleRefreshJobs);
+    connection.on("NewJobPosted", handleRefreshJobs);
+    return()=>{
+      connection.off("WorkerApplication", handleRefreshJobs);
+      connection.off("ApplicationRejected", handleRefreshJobs);
+      connection.on("NewJobPosted", handleRefreshJobs);
+    }
+  },[connection]);
 
   const applyToJob = async (jobId) => {
     try {
