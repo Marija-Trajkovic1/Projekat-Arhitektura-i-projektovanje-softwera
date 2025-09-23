@@ -60,7 +60,7 @@ const JobsByType = ({ jobTypes }) => {
     return()=>{
       connection.off("WorkerApplication", handleRefreshJobs);
       connection.off("ApplicationRejected", handleRefreshJobs);
-      connection.on("NewJobPosted", handleRefreshJobs);
+      connection.off("NewJobPosted", handleRefreshJobs);
     }
   },[connection]);
 

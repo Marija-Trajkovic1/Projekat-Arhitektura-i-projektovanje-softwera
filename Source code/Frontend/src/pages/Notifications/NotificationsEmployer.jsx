@@ -9,17 +9,23 @@ const NotificationsEmployer = () => {
     if (!connection) return;
     const handleNotification = (notification) => {
       console.log(notification);
-      setNotifications((prev) => [notification, ...prev]);
+      const text =
+        typeof notification === "string" ? notification : notification.message;
+      setNotifications((prev) => [text, ...prev]);
     };
     const handleSavedNotifications = (notifications) => {
       if (notifications !== null) {
-        setNotifications(notifications);
+        console.log(notifications);
+        const normalized = notifications.map((n) =>
+          typeof n === "string" ? n : n.message
+        );
+        setNotifications(normalized);
       } else {
         setNotifications([]);
       }
     };
 
-    connection.on("savednotifications", handleSavedNotifications);
+    connection.on("SavedNotifications", handleSavedNotifications);
     connection.on("EmployerFollowed", handleNotification);
     connection.on("EmployerUnfollowed", handleNotification);
     connection.on("WorkerApplication", handleNotification);

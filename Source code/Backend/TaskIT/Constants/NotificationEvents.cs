@@ -1,5 +1,4 @@
-﻿using System.Configuration.Internal;
-
+﻿
 namespace TaskIT.Constants
 {
     public static class NotificationEvents
@@ -7,7 +6,6 @@ namespace TaskIT.Constants
         public const string EmployerFollowed = "EmployerFollowed";
         public const string EmployerUnfollowed = "EmployerUnfollowed";
         public const string WorkerApplication = "WorkerApplication";
-
         public const string ApplicationAccepted = "ApplicationAccepted";
         public const string ApplicationDeclined = "ApplicationDeclined";
         public const string WorkerEvaluated = "WorkerEvaluated";
