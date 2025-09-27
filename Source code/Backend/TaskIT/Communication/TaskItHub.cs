@@ -35,7 +35,6 @@ namespace TaskIT.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = Context.UserIdentifier;
             await base.OnDisconnectedAsync(exception); 
         } 
 
