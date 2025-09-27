@@ -15,6 +15,7 @@ namespace TaskIT.Constants
         public const string ApplicationRejected = "ApplicationRejected";
         public const string JobAvailableAgain = "JobAvailableAgain";
         public const string SavedNotifications = "SavedNotifications";
+        public const string JobDeleted = "JobDeleted";
     }
 
 }

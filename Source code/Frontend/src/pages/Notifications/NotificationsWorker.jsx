@@ -32,6 +32,7 @@ const NotificationsWorker = () => {
     connection.on("ApplicationAccepted", handleNotification);
     connection.on("ApplicationRejected", handleNotification);
     return () => {
+      connection.off("SavedNotifications", handleSavedNotifications);
       connection.off("WorkerApplication", handleNotification);
       connection.off("ApplicationDeclined", handleNotification);
       connection.off("NewJobPosted", handleNotification);

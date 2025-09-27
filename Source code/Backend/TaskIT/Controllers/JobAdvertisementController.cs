@@ -109,8 +109,15 @@ namespace TaskIT.Controllers
         [HttpDelete("DeleteJobAdvertisement/{jobAdvertisementId}")]
         public async Task<IActionResult> DeleteJobAdvertisement([FromRoute] string jobAdvertisementId)
         {
-            if (await jobAdvertisementRepository.EntityExist(jobAdvertisementId))
-                await jobAdvertisementRepository.DeleteAsync(jobAdvertisementId);
+            var employerId = User.GetUserId();
+            var jobAdvertisementForDelete = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
+            await jobAdvertisementRepository.DeleteJobAdvertisement(jobAdvertisementForDelete);
+            var jobAd = await jobAdvertisementRepository.GetAsync(jobAdvertisementId);
+            var message = new MessageDTO { Message = $"Uspesno obrisan oglas, {jobAdvertisementForDelete.Title}" };
+            var groupJobTypeName = $"jobType_{jobAdvertisementForDelete.JobType}";
+            var groupEmployerName = $"employer_{employerId}";
+            await notificationService.NotifyGroup(NotificationEvents.JobDeleted, groupJobTypeName, message);
+            await notificationService.NotifyGroup(NotificationEvents.JobDeleted, groupEmployerName, message);
             return NoContent();
         }
 

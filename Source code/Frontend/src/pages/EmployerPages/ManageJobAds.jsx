@@ -1,11 +1,13 @@
 import { useAuth } from "../../context/AuthContext";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import JobList from "../../components/Employer/JobList";
 import { jobTypes } from "../../constants/JobTypes";
+import { useSignalR } from "../../context/SignalRContext";
 
 const ManageJobAds = () => {
-  const { token, role } = useAuth();
+  const { token } = useAuth();
+  const { connection } = useSignalR();
   const [isModalActive, setIsModalActive] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -28,7 +30,7 @@ const ManageJobAds = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params: {
-            filterBy: "employer", // ili "all" ako hoćeš sve oglase
+            filterBy: "employer",
             page: 1,
             pageSize: 10,
           },

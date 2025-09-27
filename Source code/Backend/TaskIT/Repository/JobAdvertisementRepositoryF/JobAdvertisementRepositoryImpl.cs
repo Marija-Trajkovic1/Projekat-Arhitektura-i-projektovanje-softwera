@@ -53,5 +53,16 @@ namespace TaskIT.Repository.JobAdvertisementRepositoryF
             await context.SaveChangesAsync();
             return jobAdvertisementForUpdate;
         }
+
+        public async Task<JobAdvertisement> DeleteJobAdvertisement(JobAdvertisement jobAdvertisement)
+        {
+            if (jobAdvertisement == null) throw new ArgumentNullException(nameof(jobAdvertisement));
+
+            context.JobAdvertisements.Remove(jobAdvertisement);
+            await context.SaveChangesAsync();
+
+            return jobAdvertisement;
+
+        }
     }
 }

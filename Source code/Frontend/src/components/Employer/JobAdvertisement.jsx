@@ -28,7 +28,7 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
 
     try {
       await axios.delete(
-        `https://localhost:7260/JobAdvertisement/DeleteJobAdvertisement/${id}`,
+        `https://localhost:7260/JobAdvertisement/DeleteJobAdvertisement/${ad.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -47,7 +47,7 @@ const JobAdvertisement = ({ ad, setRefreshTrigger }) => {
     setIsLoading(true);
     try {
       await axios.put(
-        `https://localhost:7260/JobAdvertisement/UpdateJobAdvertisement/${id}`,
+        `https://localhost:7260/JobAdvertisement/UpdateJobAdvertisement/${ad.id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
